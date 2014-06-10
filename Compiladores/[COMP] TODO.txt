@@ -1,0 +1,21 @@
+~~~~~~~~~~~~~~~~~~~ Leander ~~~~~~~~~~~~~~~~~~~
+br.furb.wseefeld.ui.MainWindow:
+OK	- remover o método addToken
+OK	- alterar o addMessage para usar o JTextPane que já existe, no caso, remover o HTMLNãoSeiOQue
+	OK	* applyStyle também morre
+	OK - Alterar uso de listas de ParsedToken para trabalhar com objeto Mensagem
+
+br.furb.wseefeld.controller.Compiler:
+OK	- criar a classe Mensagem para "substituir" o ParsedToken
+	
+
+br.furb.wseefeld.analyzer.generated.ScannerConstants:
+OK	- "devolver" mensagens alteradas na Parte 2
+
+br.furb.wseefeld.analyzer.generated.ParserConstants:
+	- alterar mensagens
+
+~~~~~~~~~~~~~~~~~~~ Vivian ~~~~~~~~~~~~~~~~~~~
+br.furb.wseefeld.controller.Compiler:
+	- implementar os métodos que geram as Mensagem's de erro para Léxico e Sintático (semantico não precisa)
+	- fazer as alterações necessárias nos arquivos gerados pelo Gals para obter as exceções corretamente
