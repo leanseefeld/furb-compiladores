@@ -22,7 +22,7 @@ public class Compilador {
 
 		carregarLinhas(input);
 
-		Semantico semantico = new Semantico();
+		Semantico semantico = new Semantico("NOME_DO_ARQUIVO"); // TODO: receber via parametro
 		Sintatico sintatico = new Sintatico();
 		try {
 			sintatico.parse(lexico, semantico);

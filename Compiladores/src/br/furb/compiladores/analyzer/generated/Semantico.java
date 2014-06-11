@@ -1,11 +1,39 @@
 package br.furb.compiladores.analyzer.generated;
 
+import java.util.Arrays;
 import java.util.Stack;
 
 public class Semantico implements Constants {
-	private StringBuilder instrucao = new StringBuilder();
+
+	private static final int STRING = Arrays.asList(
+			ScannerConstants.SPECIAL_CASES_KEYS).indexOf("string");
+
+	// TODO: usar algo menos gambioso...
+	private TempStrBuilder instrucao = new TempStrBuilder();
 	private Stack<String> pilhaTipo;
 	private String operadorRelacional;
+	private String fileName;
+
+	private static class TempStrBuilder {
+
+		StringBuilder builder = new StringBuilder();
+
+		public TempStrBuilder appendln(Object obj) {
+			builder.append(obj).append('\n');
+			//TODO: debug
+			System.out.println(obj);
+			return this;
+		}
+
+		@Override
+		public String toString() {
+			return builder.toString();
+		}
+	}
+
+	public Semantico(String fileName) {
+		this.fileName = fileName;
+	}
 
 	public void executeAction(int action, Token token) throws SemanticError {
 		System.out.println("Ação#" + action + ", Token: " + token);
@@ -51,7 +79,7 @@ public class Semantico implements Constants {
 			acaoSemantica16(token);
 			break;
 		case 17:
-			acaoSemantica17(token);
+			acaoSemantica17();
 			break;
 		case 18:
 			acaoSemantica18(token);
@@ -86,7 +114,7 @@ public class Semantico implements Constants {
 			tok = tok.replace("'", "\"");
 
 		}
-		instrucao.append("   ldstr ").append(tok).append("\n");
+		instrucao.appendln("   ldstr ").appendln(tok);
 
 	}
 
@@ -95,23 +123,24 @@ public class Semantico implements Constants {
 		String tipo2 = pilhaTipo.pop();
 
 		if (!tipo1.equals(tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d");
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d");
 		}
 
 		pilhaTipo.push("bool");
 
 		if (operadorRelacional.equals("=")) {
-			instrucao.append("   ceq").append("\n");
+			instrucao.appendln("   ceq");
 		} else if (operadorRelacional.equals("!=")) {
-			instrucao.append("   ").append("\n");
+			instrucao.appendln("   ");
 		} else if (operadorRelacional.equals("<")) {
-			instrucao.append("   clt").append("\n");
+			instrucao.appendln("   clt");
 		} else if (operadorRelacional.equals("<=")) {
-			instrucao.append("   ").append("\n");
+			instrucao.appendln("   ");
 		} else if (operadorRelacional.equals(">")) {
-			instrucao.append("   cgt").append("\n");
+			instrucao.appendln("   cgt");
 		} else if (operadorRelacional.equals(">=")) {
-			instrucao.append("   ").append("\n");
+			instrucao.appendln("   ");
 		}
 
 	}
@@ -125,9 +154,10 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 		if (!tipo1.equals("bool") || !tipo2.equals("bool")) {
-			throw new SemanticError("Tipos incompatíveis na expressao da linha %d");
+			throw new SemanticError(
+					"Tipos incompatíveis na expressao da linha %d");
 		}
-		instrucao.append("   and").append("\n");
+		instrucao.appendln("   and");
 
 		pilhaTipo.push("bool");
 
@@ -137,57 +167,83 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 		if (!tipo1.equals("bool") || !tipo2.equals("bool")) {
-			throw new SemanticError("Tipos incompatíveis na expressao da linha %d");
+			throw new SemanticError(
+					"Tipos incompatíveis na expressao da linha %d");
 		}
-		instrucao.append("   or").append("\n");
+		instrucao.appendln("   or");
 
 		pilhaTipo.push("bool");
 
 	}
 
-	private void acaoSemantica17(Token token) {
-		// TODO Auto-generated method stub
+	/**
+	 * Imprimir quebra de linha.
+	 */
+	private void acaoSemantica17() {
+		print(new Token(STRING, "\r\n", -1));
+	}
 
+	private void print(Token token) {
+		String tipo = pilhaTipo.pop();
+		instrucao.appendln(String.format(
+				"   call void [mscorlib]System.Console::Write(%s)", tipo));
 	}
 
 	private void acaoSemantica16(Token token) {
-		// TODO Auto-generated method stub
+		instrucao.appendln("     ret");
+		instrucao.appendln("  }");
+		instrucao.appendln("}");
 
+		System.out.println("Códgigo gerado:");
+		System.out.println("============================");
+		System.out.println(instrucao);
 	}
 
 	private void acaoSemantica15(Token token) {
-		// TODO Auto-generated method stub
-
+		instrucao.appendln(".assembly extern mscorlib{}");
+		instrucao.appendln(".assembly " + fileName + "{}");
+		instrucao.appendln(".module " + fileName + ".exe");
+		instrucao.appendln("");
+		instrucao.appendln(".class public " + fileName + " {");
+		instrucao.appendln("  .method public static void _principal ()");
+		instrucao.appendln("  {");
+		instrucao.appendln("     .entrypoint");
 	}
 
+	/**
+	 * Comandos <code>print</code> e <code>println</code>.
+	 * 
+	 * @param token
+	 *            token a ser impresso.
+	 */
 	private void acaoSemantica14(Token token) {
-		// TODO Auto-generated method stub
-
+		print(token);
 	}
 
 	private void acaoSemantica13(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 
 		if (!tipo1.equals("bool")) {
-			throw new SemanticError("Tipos incompativeis na expressao da linha %d");
+			throw new SemanticError(
+					"Tipos incompativeis na expressao da linha %d");
 		}
 
 		pilhaTipo.push("bool");
-		instrucao.append("   ldc.i4.1").append("\n");
-		instrucao.append("   xor").append("\n");
+		instrucao.appendln("   ldc.i4.1");
+		instrucao.appendln("   xor");
 
 	}
 
 	private void acaoSemantica12(Token token) {
 		if (token.getLexeme().equals("true")) {
 
-			instrucao.append("   ldc.i4.1").append("\n");
+			instrucao.appendln("   ldc.i4.1");
 
 			pilhaTipo.push("bool");
 		}
 		if (token.getLexeme().equals("false")) {
 
-			instrucao.append("   ldc.i4.0").append("\n");
+			instrucao.appendln("   ldc.i4.0");
 
 			pilhaTipo.push("bool");
 
@@ -198,13 +254,13 @@ public class Semantico implements Constants {
 	private void acaoSemantica11(Token token) {
 		if (token.getLexeme().equals("true")) {
 
-			instrucao.append("   ldc.i4.1").append("\n");
+			instrucao.appendln("   ldc.i4.1");
 
 			pilhaTipo.push("bool");
 		}
 		if (token.getLexeme().equals("false")) {
 
-			instrucao.append("   ldc.i4.0").append("\n");
+			instrucao.appendln("   ldc.i4.0");
 
 			pilhaTipo.push("bool");
 
@@ -213,19 +269,19 @@ public class Semantico implements Constants {
 	}
 
 	private void acaoSemantica07(Token token) {
-		instrucao.append("   ldc.i8 -1").append("\n");
-		instrucao.append("   mul").append("\n");
+		instrucao.appendln("   ldc.i8 -1");
+		instrucao.appendln("   mul");
 
 	}
 
 	private void acaoSemantica06(Token token) {
 		pilhaTipo.push("float64");
-		instrucao.append("   ldc.r8 " + token.getLexeme().replace(",", ".")).append("\n");
+		instrucao.appendln("   ldc.r8 " + token.getLexeme().replace(",", "."));
 	}
 
 	private void acaoSemantica05(Token token) {
 		pilhaTipo.push("int64");
-		instrucao.append("   ldc.i8 " + token.getLexeme().replace(",", ".")).append("\n");
+		instrucao.appendln("   ldc.i8 " + token.getLexeme().replace(",", "."));
 
 	}
 
@@ -234,11 +290,12 @@ public class Semantico implements Constants {
 		String tipo2 = pilhaTipo.pop();
 
 		if (!tipo1.equals(tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha  %d");
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha  %d");
 		}
 
 		pilhaTipo.push("float64");
-		instrucao.append("   div").append("\n");
+		instrucao.appendln("   div");
 
 	}
 
@@ -251,7 +308,7 @@ public class Semantico implements Constants {
 		} else {
 			pilhaTipo.push("int64");
 		}
-		instrucao.append("   mul").append("\n");
+		instrucao.appendln("   mul");
 	}
 
 	private void acaoSemantica02(Token token) {
@@ -263,7 +320,7 @@ public class Semantico implements Constants {
 		} else {
 			pilhaTipo.push("int64");
 		}
-		instrucao.append("   sub").append("\n");
+		instrucao.appendln("   sub");
 
 	}
 
@@ -276,7 +333,7 @@ public class Semantico implements Constants {
 		} else {
 			pilhaTipo.push("int64");
 		}
-		instrucao.append("   add").append("\n");
+		instrucao.appendln("   add");
 
 	}
 
