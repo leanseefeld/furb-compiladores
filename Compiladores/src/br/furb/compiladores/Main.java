@@ -12,6 +12,7 @@ public class Main {
 		mainWindow.setSize(mainWindow.getWidth(), 600);
 		mainWindow.setVisible(true);
 		UIUtils.centerOnScreen(mainWindow);
+		System.out.println("fiz uma alteração");
 	}
 
 }
