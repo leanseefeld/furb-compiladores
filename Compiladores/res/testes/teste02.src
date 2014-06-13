@@ -1,0 +1,6 @@
+main  
+  print ("digite um valor inteiro:"); 
+  scan (lado); 
+  area =  lado * lado; 
+  println (area); 
+end

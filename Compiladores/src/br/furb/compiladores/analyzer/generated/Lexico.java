@@ -31,7 +31,7 @@ public class Lexico implements Constants {
 		int lastState = 0;
 		int endState = -1;
 		int end = -1;
-		char atual = (char)-1;
+		char atual = (char) -1;
 
 		while (hasInput()) {
 			lastState = state;
@@ -51,7 +51,7 @@ public class Lexico implements Constants {
 			}
 		}
 		if (endState < 0 || (endState != state && tokenForState(lastState) == -2))
-			throw new LexicalError(lastState, position,atual);
+			throw new LexicalError(lastState, position, atual);
 		//SCANNER_ERROR[lastState]
 		position = end;
 

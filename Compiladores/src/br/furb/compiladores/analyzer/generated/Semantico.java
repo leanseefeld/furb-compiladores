@@ -10,7 +10,7 @@ public class Semantico implements Constants {
 
 	// TODO: usar algo menos gambioso...
 	private TempStrBuilder instrucao = new TempStrBuilder();
-	private Stack<String> pilhaTipo;
+	private Stack<String> pilhaTipo = new Stack<>();
 	private String operadorRelacional;
 	private String fileName;
 
@@ -36,7 +36,7 @@ public class Semantico implements Constants {
 	}
 
 	public void executeAction(int action, Token token) throws SemanticError {
-		System.out.println("Ação#" + action + ", Token: " + token);
+		//System.out.println("Ação#" + action + ", Token: " + token);
 
 		switch (action) {
 		case 1:
