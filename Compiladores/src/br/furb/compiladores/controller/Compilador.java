@@ -1,5 +1,7 @@
 package br.furb.compiladores.controller;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +19,18 @@ public class Compilador {
 	private static List<Integer> lineFeedsPosition;
 	private static int line = -1;
 
-	public static Mensagem compilar(String input) {
+	public static Mensagem compilar(String input, String nomePrograma, Writer outputWriter) throws IOException {
 		Lexico lexico = new Lexico(input);
 
 		carregarLinhas(input);
 
-		Semantico semantico = new Semantico("NOME_DO_ARQUIVO"); // TODO: receber via parametro
+		Semantico semantico = new Semantico(nomePrograma);
 		Sintatico sintatico = new Sintatico();
 		try {
 			sintatico.parse(lexico, semantico);
+			if (outputWriter != null) {
+				outputWriter.append(semantico.getInstrucoes());
+			}
 			return MSG_SUCESSO;
 		} catch (LexicalError e) {
 			line = getNumLinha(lineFeedsPosition, e.getPosition());

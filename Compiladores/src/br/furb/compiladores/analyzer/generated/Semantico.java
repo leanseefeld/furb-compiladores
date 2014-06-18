@@ -372,4 +372,8 @@ public class Semantico implements Constants {
 		instrucao.appendln("add");
 	}
 
+	public String getInstrucoes() {
+		return instrucao.toString();
+	}
+
 }

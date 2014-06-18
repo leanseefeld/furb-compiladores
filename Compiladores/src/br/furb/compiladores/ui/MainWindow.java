@@ -13,6 +13,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -40,6 +41,9 @@ import br.furb.compiladores.io.Persistencia;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
+
+	private static final String IL_EXTENSION = UIMessages.getString("MainWindow.IL_Extension"); //$NON-NLS-1$
+	private static final String MSG_CODE_SAVED_TO = UIMessages.getString("MainWindow.FileSavedTo"); //$NON-NLS-1$
 
 	private JTextField textFieldStatus;
 	private final Action newAction = new NewAction();
@@ -261,6 +265,12 @@ public class MainWindow extends JFrame {
 		}
 	}
 
+	public String getNomePrograma() {
+		if (arquivoFonte == null)
+			return UIMessages.getString("MainWindow.Unnamed_Programm"); //$NON-NLS-1$
+		return arquivoFonte.getName().replaceFirst("(?<=.)\\.[^\\.]+?$", "").replaceAll("\\s|\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+
 	private void tratarErro(Throwable t) {
 		t.printStackTrace();
 		String msg = t.getMessage();
@@ -422,12 +432,19 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			limparMensagens();
-			Mensagem msg = Compilador.compilar(getContent());
+			Mensagem msg;
+			try {
+				msg = Compilador.compilar(getContent(), getNomePrograma(), null);
+			} catch (IOException ioe) {
+				tratarErro(ioe);
+				return;
+			}
 			setMessage(msg.isErro() ? msg.getErro() : msg.getMensagem());
 		}
 	}
 
 	private class MakeAction extends AbstractAction {
+
 		public MakeAction() {
 			putValue(NAME, UIMessages.getString("MainWindow.btn_MakeCode")); //$NON-NLS-1$
 			putValue(SHORT_DESCRIPTION, UIMessages.getString("MainWindow.ttip_Make")); //$NON-NLS-1$
@@ -435,7 +452,26 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//			addToken(Messages.getString("MainWindow.error_MakeNotImplemented")); //$NON-NLS-1$
+			limparMensagens();
+
+			Mensagem msg;
+			File ilFile;
+			try (StringWriter sw = new StringWriter()) {
+				msg = Compilador.compilar(getContent(), getNomePrograma(), sw);
+
+				ilFile = new File(arquivoFonte.getParentFile(), getNomePrograma() + IL_EXTENSION);
+
+				Persistencia.salvar(ilFile, sw.toString());
+			} catch (IOException ioe) {
+				tratarErro(ioe);
+				return;
+			}
+
+			if (msg.isErro()) {
+				setMessage(msg.getErro());
+			} else {
+				setMessage(msg.getMensagem() + MSG_CODE_SAVED_TO + ilFile.getAbsolutePath());
+			}
 		}
 	}
 
