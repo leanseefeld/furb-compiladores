@@ -1,0 +1,50 @@
+{
+  Testa o comando print e o reconhecimento de <expressao>
+}
+
+main
+  // literal
+  print ("constante literal"); 
+  
+  // variáveis
+{  print (variavel);
+  print (var1, var2);
+}
+  
+  // lógicos
+  print (true);
+  print (false);
+  print (true || false);
+  print (false && false);
+  print (true && (false || true));
+
+  // inteiros
+  print (1);
+  print (3 * 1);
+  print (15 / 5);
+  print (9 - 5);
+  print (2 + 3);
+  print (3 * (5 - (2 * 2) + 8 / 8));
+
+  // reais
+  print (1,0);
+  print (3,1 - 2,1);
+  print (4,8 / 1,6);
+  print (1,25 * 3,2);
+  print (4,23139 + 0,76861);
+  print (-2,5 * (-4,25822 + (1,3 * 6,4323) / 4,5 ));
+
+  // float + real
+  print (2,0 / 2);
+  print (2 / 2,0);
+  print (1 * 2,0);
+  print (1,0 * 2);
+  print (1 + 2,0);
+  print (1,0 + 2);
+  print (7 - 3,0);
+  print (7,0 - 3);
+
+  // casos que devem falhar
+//  print (false == true);
+
+end
