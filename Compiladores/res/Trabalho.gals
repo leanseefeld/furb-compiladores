@@ -1,0 +1,173 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+Package = br.furb.compiladores.analyzer.generated
+ScannerCaseSensitive = true
+ScannerTable = Compact
+Input = String
+Parser = LL
+#RegularDefinitions
+letra: [a-zA-Z]
+digito: [0-9]
+nao_zero: [1-9]
+inteiro: {nao_zero} {digito}? {digito}? {digito}? {digito}? | 0
+
+#Tokens
+identificador: ({letra} | _ {letra}) ({digito} | _? {letra})*
+
+cte_inteiro: {inteiro}
+
+cte_float: {inteiro} , (0 | {digito}? {digito}? {digito}? {digito}? {nao_zero})
+
+cte_literal: \" ([^\\ \" \n] | \\ (\\ | \"))* \"
+
+// símbolos especiais
+"+"
+"-"
+"*"
+"/"
+"="
+"&&"
+"||"
+"!"
+"=="
+"!="
+"<"
+"<="
+">"
+">="
+","
+";"
+"("
+")"
+
+// palavras reservadas
+pr_boolean = identificador: "boolean"
+pr_do = identificador: "do"
+pr_else = identificador: "else"
+pr_end = identificador: "end"
+pr_false = identificador: "false"
+pr_float = identificador: "float"
+pr_global = identificador: "global"
+pr_if = identificador: "if"
+pr_integer = identificador: "integer"
+pr_local = identificador: "local"
+pr_main = identificador: "main"
+pr_print = identificador: "print"
+pr_println = identificador: "println"
+pr_return = identificador: "return"
+pr_scan = identificador: "scan"
+pr_string = identificador: "string"
+pr_true = identificador: "true"
+pr_void = identificador: "void"
+pr_while = identificador: "while"
+
+// caracteres de formatação - ignorados
+
+:[\n\s\t]
+
+// comentário de linha
+:! / / [^\n]*
+// comentário de bloco
+:! \{ [^}]* \}
+#NonTerminals
+<programa>
+<variaveis_globais>
+
+<variaveis>
+<tipo>
+<lista_id>
+<lista_id_1>
+<opt_valor>
+<valor>
+<cte_logica>
+
+<lista_modulos>
+<modulo>
+<tipo_modulo>
+<opt_lista_params>
+<lista_params>
+<lista_params_1>
+<param>
+<variaveis_locais>
+<retorno>
+
+<lista_cmds>
+<cmd>
+<cmd_1>
+<cmd_entrada>
+<cmd_saida>
+
+<lista_expressoes>
+<lista_expressoes_1>
+<cmd_selecao>
+<cmd_selecao_else>
+<cmd_repeticao>
+
+<params_reais>
+
+<expressao>
+<expressao_1>
+<elemento>
+<relacional>
+<relacional_1>
+<operador_relacional>
+<aritmetica>
+<aritmetica_1>
+<termo>
+<termo_1>
+<fator>
+<fator_1>
+#Grammar
+<programa> ::= #15 pr_main <variaveis_globais> <lista_modulos> <lista_cmds> pr_end #16;
+<variaveis_globais> ::= pr_global <variaveis> <variaveis_globais> | î;
+
+<variaveis> ::= <tipo> <lista_id> <opt_valor> ";";
+<tipo> ::= pr_boolean | pr_float | pr_integer | pr_string;
+<lista_id> ::= identificador <lista_id_1>;
+<lista_id_1> ::= î | "," <lista_id>;
+<opt_valor> ::= î | "=" <valor>;
+<valor> ::= cte_inteiro | cte_float | cte_literal | <cte_logica>;
+<cte_logica> ::= pr_true | pr_false;
+
+<lista_modulos> ::= <modulo> <lista_modulos> | î;
+<modulo> ::= <tipo_modulo> identificador "(" <opt_lista_params> ")" <variaveis_locais> <lista_cmds> <retorno> pr_end;
+<tipo_modulo> ::= <tipo> | pr_void;
+<opt_lista_params> ::= î | <lista_params>;
+<lista_params> ::= <param> <lista_params_1>;
+<lista_params_1> ::= î |  "," <lista_params>;
+<param> ::= <tipo> identificador;
+<variaveis_locais> ::= pr_local <variaveis> <variaveis_locais> | î;
+<retorno> ::= î | pr_return <expressao>;
+
+<lista_cmds> ::= î | <cmd> <lista_cmds>;
+<cmd> ::= identificador <cmd_1> | <cmd_entrada> | <cmd_saida> | <cmd_selecao> | <cmd_repeticao>;
+<cmd_1> ::= "=" <expressao> ";" | "(" <params_reais> ")" ";";
+<cmd_entrada> ::= pr_scan "(" <lista_id> ")" ";";
+
+<cmd_saida> ::= pr_print "(" <lista_expressoes> ")" ";" | pr_println "(" <lista_expressoes> #17 ")" ";" ;
+
+<lista_expressoes> ::= <expressao> #14 <lista_expressoes_1>;
+<lista_expressoes_1> ::= î | "," <lista_expressoes>;
+<cmd_selecao> ::= pr_if "(" <expressao> ")" <lista_cmds> <cmd_selecao_else> pr_end ";";
+<cmd_selecao_else> ::= pr_else <lista_cmds> | î;
+<cmd_repeticao> ::= pr_do <lista_cmds> pr_while "(" <expressao> ")" ";";
+
+<params_reais> ::= î | <lista_expressoes>;
+
+<expressao> ::= <elemento> <expressao_1>;
+<expressao_1> ::= î | "||" <elemento> #18 <expressao_1> | "&&" <elemento> #19 <expressao_1>;
+<elemento> ::= <relacional> | pr_true #11 | pr_false #12 | "!" <elemento> #13;
+<relacional> ::= <aritmetica> <relacional_1>;
+<relacional_1> ::= î | <operador_relacional> #20 <aritmetica> #21;
+<operador_relacional> ::= "==" | "!=" | "<" | "<=" | ">" | ">=";
+<aritmetica> ::= <termo> <aritmetica_1>;
+<aritmetica_1> ::= î | "+" <termo> #1 <aritmetica_1> | "-" <termo> #2 <aritmetica_1>;
+<termo> ::=  <fator> <termo_1>;
+<termo_1> ::= î | "*" <fator> #3 <termo_1>  | "/" <fator> #4  <termo_1>;
+<fator> ::= identificador <fator_1> | cte_inteiro #5 | cte_float #6 | cte_literal #22 | "(" <expressao> ")" | "+" <fator> #23 | "-" <fator> #7;
+<fator_1> ::= î | "(" <lista_expressoes> ")";
