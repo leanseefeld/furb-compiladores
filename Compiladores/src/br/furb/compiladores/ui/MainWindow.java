@@ -11,6 +11,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -163,9 +164,12 @@ public class MainWindow extends JFrame {
 
 		textAreaEditor = new JTextArea();
 		textAreaEditor.addKeyListener(new KeyAdapter() {
+
+			final KeyStroke CONTROL_TYPED = KeyStroke.getKeyStroke(0, InputEvent.CTRL_DOWN_MASK);
+
 			@Override
 			public void keyTyped(KeyEvent e) {
-				if (!modificado) {
+				if (!e.isActionKey() && KeyStroke.getKeyStroke(0, e.getModifiersEx()) != CONTROL_TYPED && !modificado) {
 					modificado = true;
 					atualizarStatus();
 				}
