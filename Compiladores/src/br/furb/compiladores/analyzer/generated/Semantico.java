@@ -127,7 +127,7 @@ public class Semantico implements Constants {
 
 		String command = null;
 		switch (operadorRelacional) {
-		case "=":
+		case "==":
 			command = "ceq";
 			break;
 		case "!=":
@@ -154,7 +154,7 @@ public class Semantico implements Constants {
 	 * Reconhecimento de operador relacional.
 	 */
 	private void acaoSemantica20(Token token) {
-		operadorRelacional = token.getLexeme();
+ 		operadorRelacional = token.getLexeme();
 	}
 
 	/**
@@ -282,7 +282,6 @@ public class Semantico implements Constants {
 	 * Fator precedido pelo símbolo de negativo ("-").
 	 */
 	private void acaoSemantica07(Token token) {
-		// TODO: verificação de tipo
 		instrucao.appendln("ldc.i8 -1");
 		instrucao.appendln("mul");
 	}
@@ -313,8 +312,13 @@ public class Semantico implements Constants {
 		if (!isNumerico(tipo1, tipo2)) {
 			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
 		}
-
-		pilhaTipo.push(FLOAT64);
+		        
+        if (tipo1 == (INT64) && tipo2 == (INT64)) {
+            pilhaTipo.push(INT64);
+        } else {
+            pilhaTipo.push(FLOAT64);
+        }
+        
 		instrucao.appendln("div");
 	}
 
@@ -329,12 +333,17 @@ public class Semantico implements Constants {
 
 	/**
 	 * Multiplicação.
+	 * @throws SemanticError 
 	 */
-	private void acaoSemantica03(Token token) {
+	private void acaoSemantica03(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
+		
+		if (!isNumerico(tipo1, tipo2)) {
+			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+		}
 
-		if (tipo1.equals(FLOAT64) && tipo2.equals(FLOAT64)) {
+		if (tipo1 == (FLOAT64) || tipo2 == (FLOAT64)) {
 			pilhaTipo.push(FLOAT64);
 		} else {
 			pilhaTipo.push(INT64);
@@ -344,12 +353,17 @@ public class Semantico implements Constants {
 
 	/**
 	 * Subtração
+	 * @throws SemanticError 
 	 */
-	private void acaoSemantica02(Token token) {
+	private void acaoSemantica02(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
+		
+		if (!isNumerico(tipo1, tipo2)) {
+			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+		}
 
-		if (tipo1 == FLOAT64 && tipo2 == FLOAT64) {
+		if (tipo1 == FLOAT64 || tipo2 == FLOAT64) {
 			pilhaTipo.push(FLOAT64);
 		} else {
 			pilhaTipo.push(INT64);
@@ -359,12 +373,17 @@ public class Semantico implements Constants {
 
 	/**
 	 * Soma
+	 * @throws SemanticError 
 	 */
-	private void acaoSemantica01(Token token) {
+	private void acaoSemantica01(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
+		
+		if (!isNumerico(tipo1, tipo2)) {
+			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+		}
 
-		if (tipo1.equals(FLOAT64) && tipo2.equals(FLOAT64)) {
+		if (tipo1 == (FLOAT64) || tipo2 == (FLOAT64)) {
 			pilhaTipo.push(FLOAT64);
 		} else {
 			pilhaTipo.push(INT64);
