@@ -38,6 +38,7 @@ import wseefeld.utils.StringUtils;
 import br.furb.compiladores.analyzer.Mensagem;
 import br.furb.compiladores.controller.Compilador;
 import br.furb.compiladores.io.Persistencia;
+import br.org.ilasm.IlasmBuilder;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
@@ -462,6 +463,12 @@ public class MainWindow extends JFrame {
 				ilFile = new File(arquivoFonte.getParentFile(), getNomePrograma() + IL_EXTENSION);
 
 				Persistencia.salvar(ilFile, sw.toString());
+				
+				// TODO: ifdebug
+				IlasmBuilder.setPathFileIlasm(ilFile.getAbsolutePath()); // TODO
+				IlasmBuilder.setPathFileBuild(new File(ilFile.getParentFile(), getNomePrograma() + ".exe").getAbsolutePath());
+//				IlasmBuilder.
+				// TODO: endif
 			} catch (IOException ioe) {
 				tratarErro(ioe);
 				return;
