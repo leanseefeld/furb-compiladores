@@ -40,15 +40,15 @@ public class Compilador {
 	}
 
 	private static Mensagem criarMsgErroSemantico(SemanticError e) {
-		return new Mensagem(line, e.toString());
+		return new Mensagem(line, e.getMessage(), true);
 	}
 
 	private static Mensagem criarMsgErroSintatico(SyntaticError e) {
-		return new Mensagem(line, String.format(e.getMessage(),line));
+		return new Mensagem(line, e.getMessage(), true);
 	}
 
 	private static Mensagem criarMsgErroLexico(LexicalError e) {
-		return new Mensagem(line, String.format(e.getMessage(), line));
+		return new Mensagem(line, e.getMessage(), true);
 	}
 
 	private static int getNumLinha(List<Integer> linesPosition, int position) {
