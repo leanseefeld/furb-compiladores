@@ -86,6 +86,8 @@ public class Semantico implements Constants {
 				acaoSemantica23(token);
 				break;
 			}
+		} catch (SemanticError se) {
+			throw se;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new SemanticError("Erro reconhecendo o programa: " + e.toString());
@@ -205,6 +207,8 @@ public class Semantico implements Constants {
 		instrucao.appendln("}");
 		instrucao.dec();
 
+		System.out.println();
+		System.out.println("A pilha de tipos terminou " + (pilhaTipo.isEmpty() ? "vazia" : "com os seguintes tipos: " + pilhaTipo.toString()));
 		System.out.println("Códgigo gerado:");
 		System.out.println("============================");
 		System.out.println(instrucao);
@@ -306,13 +310,21 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 
-		// TODO: deve ser numérico
-		if (!tipo1.equals(tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha  %d");
+		if (!isNumerico(tipo1, tipo2)) {
+			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
 		}
 
 		pilhaTipo.push(FLOAT64);
 		instrucao.appendln("div");
+	}
+
+	private static boolean isNumerico(String... tipos) {
+		for (String tipo : tipos) {
+			if (tipo != INT64 && tipo != FLOAT64) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
