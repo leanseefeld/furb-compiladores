@@ -75,7 +75,7 @@ public class MainWindow extends JFrame {
 		btnNovo.setVerticalTextPosition(SwingConstants.BOTTOM);
 		btnNovo.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnNovo.setVerticalAlignment(SwingConstants.BOTTOM);
-		btnNovo.setIcon(new ImageIcon(MainWindow.class.getResource("/icons/add_file/add_file-48.png")));
+		btnNovo.setIcon(new ImageIcon(MainWindow.class.getResource("/icons/add_file/add_file-48.png"))); //$NON-NLS-1$
 		btnNovo.setMnemonic('N');
 		panelButtons.add(btnNovo);
 
@@ -87,7 +87,7 @@ public class MainWindow extends JFrame {
 		panelButtons.add(btnAbrir);
 
 		JButton btnSalvar = new JButton(saveAction);
-		btnSalvar.setIcon(new ImageIcon(MainWindow.class.getResource("/icons/save/save-48.png")));
+		btnSalvar.setIcon(new ImageIcon(MainWindow.class.getResource("/icons/save/save-48.png"))); //$NON-NLS-1$
 		btnSalvar.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnSalvar.setVerticalTextPosition(SwingConstants.BOTTOM);
 		btnSalvar.setMnemonic('S');
@@ -142,7 +142,7 @@ public class MainWindow extends JFrame {
 
 		textPaneMessages = new JTextPane();
 		textPaneMessages.setEditable(false);
-		float lineHeight = textPaneMessages.getFontMetrics(textPaneMessages.getFont()).getLineMetrics("Wj", getGraphics()).getHeight();
+		float lineHeight = textPaneMessages.getFontMetrics(textPaneMessages.getFont()).getLineMetrics("Wj", getGraphics()).getHeight(); //$NON-NLS-1$
 		textPaneMessages.setPreferredSize(new Dimension(20, (int) (lineHeight * 5)));
 		panelInfo.add(textPaneMessages, BorderLayout.NORTH);
 
@@ -217,7 +217,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public void limparMensagens() {
-		textPaneMessages.setText("");
+		textPaneMessages.setText(""); //$NON-NLS-1$
 	}
 
 	private void atualizarStatus() {
@@ -274,10 +274,14 @@ public class MainWindow extends JFrame {
 		textFieldStatus.setText(message);
 	}
 
-	private File escolherArquivoFonte(File diretorioAtual) {
+	private File escolherArquivoFonte(File diretorioAtual, boolean selecionar) {
 		JFileChooser chooser = new JFileChooser(arquivoFonte);
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		chooser.setMultiSelectionEnabled(false);
+		if (!selecionar) {
+			chooser.setApproveButtonText(UIMessages.getString("MainWindow.dialog_Save")); //$NON-NLS-1$
+			chooser.setDialogTitle(UIMessages.getString("MainWindow.dialog_Save")); //$NON-NLS-1$
+		}
 		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			return chooser.getSelectedFile();
 		}
@@ -296,7 +300,7 @@ public class MainWindow extends JFrame {
 
 		public NewAction() {
 			putValue(NAME, UIMessages.getString("MainWindow.btn_New")); //$NON-NLS-1$
-			putValue(SHORT_DESCRIPTION, "Criar um novo arquivo."); //$NON-NLS-1$
+			putValue(SHORT_DESCRIPTION, UIMessages.getString("MainWindow.ttip_New")); //$NON-NLS-1$
 			putValue(MNEMONIC_KEY, (int) 'N');
 		}
 
@@ -314,7 +318,7 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			File f = escolherArquivoFonte(arquivoFonte);
+			File f = escolherArquivoFonte(arquivoFonte, true);
 			if (f != null) {
 				setArquivoFonte(f);
 			}
@@ -332,7 +336,7 @@ public class MainWindow extends JFrame {
 			if (codigoModificado) {
 				File f = null;
 				if (MainWindow.this.arquivoFonte == null) {
-					f = MainWindow.this.arquivoFonte = escolherArquivoFonte(null);
+					f = MainWindow.this.arquivoFonte = escolherArquivoFonte(null, false);
 				} else {
 					f = MainWindow.this.arquivoFonte;
 				}
@@ -418,8 +422,8 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			limparMensagens();
-			Mensagem resultado = Compilador.compilar(getContent());
-			setMessage(resultado.getMensagem());
+			Mensagem msg = Compilador.compilar(getContent());
+			setMessage(msg.isErro() ? msg.getErro() : msg.getMensagem());
 		}
 	}
 
