@@ -11,9 +11,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -32,6 +29,8 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import wseefeld.ui.UIUtils;
 import wseefeld.utils.StringUtils;
@@ -56,7 +55,8 @@ public class MainWindow extends JFrame {
 	private JTextArea textAreaEditor;
 
 	private File arquivoFonte;
-	private boolean modificado = false;
+	private boolean codigoModificado = false;
+	private boolean alterandoCodigo = false;
 	private JTextPane textPaneMessages;
 
 	public MainWindow() {
@@ -163,21 +163,32 @@ public class MainWindow extends JFrame {
 		getContentPane().add(scrollPaneEditor, BorderLayout.CENTER);
 
 		textAreaEditor = new JTextArea();
-		textAreaEditor.addKeyListener(new KeyAdapter() {
-
-			final KeyStroke CONTROL_TYPED = KeyStroke.getKeyStroke(0, InputEvent.CTRL_DOWN_MASK);
+		textAreaEditor.setBorder(new NumberedBorder());
+		textAreaEditor.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override
-			public void keyTyped(KeyEvent e) {
-				if (!e.isActionKey() && KeyStroke.getKeyStroke(0, e.getModifiersEx()) != CONTROL_TYPED && !modificado) {
-					modificado = true;
+			public void removeUpdate(DocumentEvent e) {
+				documentChanged();
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				documentChanged();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				documentChanged();
+			}
+
+			private void documentChanged() {
+				if (!alterandoCodigo && !codigoModificado) {
+					codigoModificado = true;
 					atualizarStatus();
 				}
 			}
 		});
 		scrollPaneEditor.setViewportView(textAreaEditor);
-
-		textAreaEditor.setBorder(new NumberedBorder());
 
 		mapAction(KeyStroke.getKeyStroke("control N"), newAction, btnNovo); //$NON-NLS-1$
 		mapAction(KeyStroke.getKeyStroke("control A"), openAction, btnAbrir, //$NON-NLS-1$
@@ -214,7 +225,7 @@ public class MainWindow extends JFrame {
 		if (arquivoFonte != null) {
 			mensagem += arquivoFonte.getAbsolutePath() + UIMessages.getString("MainWindow.status_Separator"); //$NON-NLS-1$
 		}
-		mensagem += modificado ? UIMessages.getString("MainWindow.status_Modified") : UIMessages.getString("MainWindow.status_Unmodified"); //$NON-NLS-1$ //$NON-NLS-2$
+		mensagem += codigoModificado ? UIMessages.getString("MainWindow.status_Modified") : UIMessages.getString("MainWindow.status_Unmodified"); //$NON-NLS-1$ //$NON-NLS-2$
 		setStatusMessage(mensagem);
 	}
 
@@ -229,7 +240,11 @@ public class MainWindow extends JFrame {
 	}
 
 	public void setCodigo(String codigo) {
+		this.alterandoCodigo = true;
 		this.textAreaEditor.setText(codigo);
+		this.alterandoCodigo = false;
+		this.codigoModificado = false;
+		atualizarStatus();
 	}
 
 	public String getContent() {
@@ -237,11 +252,9 @@ public class MainWindow extends JFrame {
 	}
 
 	public void setArquivoFonte(File arquivoFonte) {
-		this.modificado = false;
 		this.arquivoFonte = arquivoFonte;
 		try {
 			setCodigo(Persistencia.ler(arquivoFonte));
-			atualizarStatus();
 			limparMensagens();
 		} catch (IOException e) {
 			tratarErro(e);
@@ -316,7 +329,7 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (modificado) {
+			if (codigoModificado) {
 				File f = null;
 				if (MainWindow.this.arquivoFonte == null) {
 					f = MainWindow.this.arquivoFonte = escolherArquivoFonte(null);
@@ -327,7 +340,7 @@ public class MainWindow extends JFrame {
 				if (f != null) {
 					try {
 						Persistencia.salvar(f, getContent());
-						modificado = false;
+						codigoModificado = false;
 						limparMensagens();
 						atualizarStatus();
 					} catch (IOException ex) {
