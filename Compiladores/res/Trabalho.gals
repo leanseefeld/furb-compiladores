@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = br.furb.compiladores.analyzer.generated
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = String
+Input = Stream
 Parser = LL
 #RegularDefinitions
 letra: [a-zA-Z]
@@ -126,11 +126,11 @@ pr_while = identificador: "while"
 <programa> ::= #15 pr_main <variaveis_globais> <lista_modulos> <lista_cmds> pr_end #16;
 <variaveis_globais> ::= pr_global <variaveis> <variaveis_globais> | î;
 
-<variaveis> ::= <tipo> <lista_id> <opt_valor> ";";
+<variaveis> ::= <tipo> #24 <lista_id> #26 <opt_valor> ";";
 <tipo> ::= pr_boolean | pr_float | pr_integer | pr_string;
-<lista_id> ::= identificador <lista_id_1>;
+<lista_id> ::= identificador #25 <lista_id_1>;
 <lista_id_1> ::= î | "," <lista_id>;
-<opt_valor> ::= î | "=" <valor>;
+<opt_valor> ::= î | "=" <valor> #30;
 <valor> ::= cte_inteiro | cte_float | cte_literal | <cte_logica>;
 <cte_logica> ::= pr_true | pr_false;
 
@@ -145,17 +145,17 @@ pr_while = identificador: "while"
 <retorno> ::= î | pr_return <expressao>;
 
 <lista_cmds> ::= î | <cmd> <lista_cmds>;
-<cmd> ::= identificador <cmd_1> | <cmd_entrada> | <cmd_saida> | <cmd_selecao> | <cmd_repeticao>;
-<cmd_1> ::= "=" <expressao> ";" | "(" <params_reais> ")" ";";
-<cmd_entrada> ::= pr_scan "(" <lista_id> ")" ";";
+<cmd> ::= identificador #25 <cmd_1> | <cmd_entrada> | <cmd_saida> | <cmd_selecao> | <cmd_repeticao>;
+<cmd_1> ::= "=" <expressao> #29 ";" | "(" <params_reais> ")" ";";
+<cmd_entrada> ::= pr_scan "(" <lista_id> #27 ")" ";";
 
 <cmd_saida> ::= pr_print "(" <lista_expressoes> ")" ";" | pr_println "(" <lista_expressoes> #17 ")" ";" ;
 
 <lista_expressoes> ::= <expressao> #14 <lista_expressoes_1>;
 <lista_expressoes_1> ::= î | "," <lista_expressoes>;
-<cmd_selecao> ::= pr_if "(" <expressao> ")" <lista_cmds> <cmd_selecao_else> pr_end ";";
-<cmd_selecao_else> ::= pr_else <lista_cmds> | î;
-<cmd_repeticao> ::= pr_do <lista_cmds> pr_while "(" <expressao> ")" ";";
+<cmd_selecao> ::= pr_if "(" <expressao> ")" #31 <lista_cmds> <cmd_selecao_else> pr_end #32 ";";
+<cmd_selecao_else> ::= pr_else #33 <lista_cmds> | î;
+<cmd_repeticao> ::= pr_do #34 <lista_cmds> pr_while "(" <expressao> ")" #35 ";";
 
 <params_reais> ::= î | <lista_expressoes>;
 
@@ -169,5 +169,5 @@ pr_while = identificador: "while"
 <aritmetica_1> ::= î | "+" <termo> #1 <aritmetica_1> | "-" <termo> #2 <aritmetica_1>;
 <termo> ::=  <fator> <termo_1>;
 <termo_1> ::= î | "*" <fator> #3 <termo_1>  | "/" <fator> #4  <termo_1>;
-<fator> ::= identificador <fator_1> | cte_inteiro #5 | cte_float #6 | cte_literal #22 | "(" <expressao> ")" | "+" <fator> #23 | "-" <fator> #7;
+<fator> ::= identificador #28 <fator_1> | cte_inteiro #5 | cte_float #6 | cte_literal #22 | "(" <expressao> ")" | "+" <fator> #23 | "-" <fator> #7;
 <fator_1> ::= î | "(" <lista_expressoes> ")";
