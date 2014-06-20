@@ -1,5 +1,9 @@
 package br.furb.compiladores.analyzer.generated;
 
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import br.furb.compiladores.analyzer.IndentedCodeBuilder;
@@ -15,7 +19,10 @@ public class Semantico implements Constants {
 	private Stack<String> pilhaTipo = new Stack<>();
 	private String operadorRelacional;
 	private String fileName;
-
+	private List<String> areaInstrucoes;
+	
+	private String tipoDeclarado;
+	
 	public Semantico(String fileName) {
 		this.fileName = fileName;
 	}
@@ -85,13 +92,112 @@ public class Semantico implements Constants {
 			case 23:
 				acaoSemantica23(token);
 				break;
+			case 24:
+				acaoSemantica24(token);
+				break;
+			case 25:
+				acaoSemantica25(token);
+				break;
+			case 26:
+				acaoSemantica26(token);
+				break;
+			case 27:
+				acaoSemantica27(token);
+				break;
+			case 28:
+				acaoSemantica28(token);
+				break;
+			case 29:
+				acaoSemantica29(token);
+				break;
+			case 30:
+				acaoSemantica31(token);
+				break;
+			case 32:
+				acaoSemantica32(token);
+				break;
+			case 33:
+				acaoSemantica33(token);
+				break;
+			case 34:
+				acaoSemantica34(token);
+				break;
+			case 35:
+				acaoSemantica35(token);
+				break;
 			}
+
 		} catch (SemanticError se) {
 			throw se;
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new SemanticError("Erro reconhecendo o programa: " + e.toString());
+			throw new SemanticError("Erro reconhecendo o programa: "
+					+ e.toString());
 		}
+
+	}
+
+	private void acaoSemantica35(Token token) {
+
+	}
+
+	private void acaoSemantica34(Token token) {
+
+	}
+
+	private void acaoSemantica33(Token token) {
+
+	}
+
+	private void acaoSemantica32(Token token) {
+
+	}
+
+	private void acaoSemantica31(Token token) {
+
+	}
+
+	private void acaoSemantica30(Token token) {
+		
+		
+
+	}
+
+	private void acaoSemantica29(Token token) {
+
+	}
+
+	private void acaoSemantica28(Token token) {
+
+	}
+
+	private void acaoSemantica27(Token token) {
+
+	}
+
+	private void acaoSemantica26(Token token) throws SemanticError {
+
+	}
+
+	private void acaoSemantica25(Token token) {
+		
+
+	}
+
+	private void acaoSemantica24(Token token) {
+		if (token.getLexeme().equalsIgnoreCase("float")) {
+            tipoDeclarado = "FLOAT64";
+
+        } else if (token.getLexeme().equalsIgnoreCase("string")) {
+            tipoDeclarado = "STRING";
+
+        } // else if (token.getLexeme().equalsIgnoreCase("bool")) {
+        //        tipoDeclarado = "BOOL";a
+        //  }
+        else if (token.getLexeme().equalsIgnoreCase("int")) {
+            tipoDeclarado = "INT64";
+
+        }
 
 	}
 
@@ -107,7 +213,11 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica22(Token token) {
 		pilhaTipo.push(STRING);
-		String lexeme = token.getLexeme().replace("'", "\""); // FIXME: isso torna impossível usar apóstrofos
+		String lexeme = token.getLexeme().replace("'", "\""); // FIXME: isso
+																// torna
+																// impossível
+																// usar
+																// apóstrofos
 		instrucao.append("ldstr ").appendln(lexeme);
 	}
 
@@ -120,7 +230,8 @@ public class Semantico implements Constants {
 		String tipo2 = pilhaTipo.pop();
 
 		if (tipo1 != tipo2) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d");
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d");
 		}
 
 		pilhaTipo.push(BOOL);
@@ -144,7 +255,8 @@ public class Semantico implements Constants {
 		case ">=":
 			command = "   "; // TODO
 		default:
-			throw new SemanticError("Operador não reconhecido: " + operadorRelacional);
+			throw new SemanticError("Operador não reconhecido: "
+					+ operadorRelacional);
 		}
 
 		instrucao.appendln(command);
@@ -154,7 +266,7 @@ public class Semantico implements Constants {
 	 * Reconhecimento de operador relacional.
 	 */
 	private void acaoSemantica20(Token token) {
- 		operadorRelacional = token.getLexeme();
+		operadorRelacional = token.getLexeme();
 	}
 
 	/**
@@ -164,7 +276,8 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 		if (tipo1 != BOOL || tipo2 != BOOL) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d");
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d");
 		}
 		instrucao.appendln("and");
 
@@ -178,7 +291,8 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 		if (tipo1 != BOOL || tipo2 != BOOL) {
-			throw new SemanticError("Tipo incompatível na expressão da linha %d");
+			throw new SemanticError(
+					"Tipo incompatível na expressão da linha %d");
 		}
 		instrucao.appendln("or");
 
@@ -193,7 +307,8 @@ public class Semantico implements Constants {
 	}
 
 	private void print(String tipo) {
-		instrucao.appendln(String.format("call void [mscorlib]System.Console::Write(%s)", tipo));
+		instrucao.appendln(String.format(
+				"call void [mscorlib]System.Console::Write(%s)", tipo));
 	}
 
 	/**
@@ -208,7 +323,9 @@ public class Semantico implements Constants {
 		instrucao.dec();
 
 		System.out.println();
-		System.out.println("A pilha de tipos terminou " + (pilhaTipo.isEmpty() ? "vazia" : "com os seguintes tipos: " + pilhaTipo.toString()));
+		System.out.println("A pilha de tipos terminou "
+				+ (pilhaTipo.isEmpty() ? "vazia" : "com os seguintes tipos: "
+						+ pilhaTipo.toString()));
 		System.out.println("Códgigo gerado:");
 		System.out.println("============================");
 		System.out.println(instrucao);
@@ -245,7 +362,8 @@ public class Semantico implements Constants {
 	private void acaoSemantica13(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		if (tipo1 != BOOL) {
-			throw new SemanticError("Tipos incompativeis na expressão da linha %d");
+			throw new SemanticError(
+					"Tipos incompativeis na expressão da linha %d");
 		}
 		pilhaTipo.push(BOOL);
 		instrucao.appendln("ldc.i4.1");
@@ -256,7 +374,8 @@ public class Semantico implements Constants {
 	 * Reconhecimento da constante lógica <code>false<code>.
 	 */
 	private void acaoSemantica12(Token token) {
-		if (token.getLexeme().equals("true")) { // TODO: isso realmente é possível, Arnaldo? oO
+		if (token.getLexeme().equals("true")) { // TODO: isso realmente é
+												// possível, Arnaldo? oO
 			instrucao.appendln("ldc.i4.1");
 			pilhaTipo.push(BOOL);
 		} else if (token.getLexeme().equals("false")) {
@@ -272,7 +391,9 @@ public class Semantico implements Constants {
 		if (token.getLexeme().equals("true")) {
 			instrucao.appendln("ldc.i4.1");
 			pilhaTipo.push(BOOL);
-		} else if (token.getLexeme().equals("false")) { // TODO: isso realmente é possível, Arnaldo? oO
+		} else if (token.getLexeme().equals("false")) { // TODO: isso realmente
+														// é possível, Arnaldo?
+														// oO
 			instrucao.appendln("ldc.i4.0");
 			pilhaTipo.push(BOOL);
 		}
@@ -310,15 +431,17 @@ public class Semantico implements Constants {
 		String tipo2 = pilhaTipo.pop();
 
 		if (!isNumerico(tipo1, tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d",
+					token.getPosition());
 		}
-		        
-        if (tipo1 == (INT64) && tipo2 == (INT64)) {
-            pilhaTipo.push(INT64);
-        } else {
-            pilhaTipo.push(FLOAT64);
-        }
-        
+
+		if (tipo1 == (INT64) && tipo2 == (INT64)) {
+			pilhaTipo.push(INT64);
+		} else {
+			pilhaTipo.push(FLOAT64);
+		}
+
 		instrucao.appendln("div");
 	}
 
@@ -333,14 +456,17 @@ public class Semantico implements Constants {
 
 	/**
 	 * Multiplicação.
-	 * @throws SemanticError 
+	 * 
+	 * @throws SemanticError
 	 */
 	private void acaoSemantica03(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
-		
+
 		if (!isNumerico(tipo1, tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d",
+					token.getPosition());
 		}
 
 		if (tipo1 == (FLOAT64) || tipo2 == (FLOAT64)) {
@@ -353,14 +479,17 @@ public class Semantico implements Constants {
 
 	/**
 	 * Subtração
-	 * @throws SemanticError 
+	 * 
+	 * @throws SemanticError
 	 */
 	private void acaoSemantica02(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
-		
+
 		if (!isNumerico(tipo1, tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d",
+					token.getPosition());
 		}
 
 		if (tipo1 == FLOAT64 || tipo2 == FLOAT64) {
@@ -373,14 +502,17 @@ public class Semantico implements Constants {
 
 	/**
 	 * Soma
-	 * @throws SemanticError 
+	 * 
+	 * @throws SemanticError
 	 */
 	private void acaoSemantica01(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
-		
+
 		if (!isNumerico(tipo1, tipo2)) {
-			throw new SemanticError("Tipos incompatíveis na expressão da linha %d", token.getPosition());
+			throw new SemanticError(
+					"Tipos incompatíveis na expressão da linha %d",
+					token.getPosition());
 		}
 
 		if (tipo1 == (FLOAT64) || tipo2 == (FLOAT64)) {
@@ -394,5 +526,7 @@ public class Semantico implements Constants {
 	public String getInstrucoes() {
 		return instrucao.toString();
 	}
+	
+	
 
 }
