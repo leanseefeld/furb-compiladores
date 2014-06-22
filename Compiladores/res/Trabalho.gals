@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = br.furb.compiladores.analyzer.generated
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = Stream
+Input = String
 Parser = LL
 #RegularDefinitions
 letra: [a-zA-Z]
