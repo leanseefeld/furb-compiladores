@@ -134,7 +134,7 @@ pr_while = identificador: "while"
 <valor> ::= cte_inteiro | cte_float | cte_literal | <cte_logica>;
 <cte_logica> ::= pr_true | pr_false;
 
-<lista_modulos> ::= <modulo> <lista_modulos> | î;
+<lista_modulos> ::= #99 <modulo> <lista_modulos> | î;
 <modulo> ::= <tipo_modulo> identificador "(" <opt_lista_params> ")" <variaveis_locais> <lista_cmds> <retorno> pr_end;
 <tipo_modulo> ::= <tipo> | pr_void;
 <opt_lista_params> ::= î | <lista_params>;
@@ -146,7 +146,7 @@ pr_while = identificador: "while"
 
 <lista_cmds> ::= î | <cmd> <lista_cmds>;
 <cmd> ::= identificador #25 <cmd_1> | <cmd_entrada> | <cmd_saida> | <cmd_selecao> | <cmd_repeticao>;
-<cmd_1> ::= "=" <expressao> #29 ";" | "(" <params_reais> ")" ";";
+<cmd_1> ::= "=" <expressao> #29 ";" | "(" <params_reais> ")" ";" #99;
 <cmd_entrada> ::= pr_scan "(" <lista_id> #27 ")" ";";
 
 <cmd_saida> ::= pr_print "(" <lista_expressoes> ")" ";" | pr_println "(" <lista_expressoes> #17 ")" ";" ;
