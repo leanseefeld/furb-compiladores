@@ -132,6 +132,8 @@ public class Semantico implements Constants {
 			case 35:
 				acaoSemantica35(token);
 				break;
+			case 99:
+				throw new SemanticError("Construção e uso de módulos não suportados");
 			default:
 				throw new IllegalArgumentException("ação não suportada: " + action);
 			}
@@ -144,22 +146,52 @@ public class Semantico implements Constants {
 
 	}
 
+	/**
+	 * Fim do comando de repetição {@code "do-while"}.
+	 * 
+	 * @param token
+	 *            desnecessário.
+	 */
 	private void acaoSemantica35(Token token) {
 		// TODO
 	}
 
+	/**
+	 * Início do comando de repetição {@code "do-while"}.
+	 * 
+	 * @param token
+	 *            desnecessário.
+	 */
 	private void acaoSemantica34(Token token) {
 		// TODO
 	}
 
+	/**
+	 * Comando de seleção {@code "else"}
+	 * 
+	 * @param token
+	 *            desnecessário.
+	 */
 	private void acaoSemantica33(Token token) {
 		// TODO
 	}
 
+	/**
+	 * Fim do comando de seleção ({@code "end"}).
+	 * 
+	 * @param token
+	 *            desnecessário.
+	 */
 	private void acaoSemantica32(Token token) {
 		// TODO
 	}
 
+	/**
+	 * Comando de seleção {@code "if"}.
+	 * 
+	 * @param token
+	 *            desnecessário.
+	 */
 	private void acaoSemantica31(Token token) {
 		// TODO
 	}
@@ -183,14 +215,32 @@ public class Semantico implements Constants {
 		}
 	}
 
+	/**
+	 * Atribuição de variável.
+	 * 
+	 * @param token
+	 *            expressão sendo atribuída.
+	 */
 	private void acaoSemantica29(Token token) {
 		// TODO
 	}
 
+	/**
+	 * Identificador sendo usado como fator.
+	 * 
+	 * @param token
+	 *            identificador.
+	 */
 	private void acaoSemantica28(Token token) {
 		// TODO
 	}
 
+	/**
+	 * Finalização da lista de identificadores para o comando de entrada.
+	 * 
+	 * @param token
+	 *            desnecessário.
+	 */
 	private void acaoSemantica27(Token token) {
 		// TODO
 	}
@@ -219,6 +269,12 @@ public class Semantico implements Constants {
 		simbolos.inserir(identificador);
 	}
 
+	/**
+	 * Reconhece o tipo de uma variável global.
+	 * 
+	 * @param token
+	 *            tipo da variável.
+	 */
 	private void acaoSemantica24(Token token) {
 		final String lexeme = token.getLexeme().toLowerCase().intern();
 		switch (lexeme) {
@@ -248,7 +304,7 @@ public class Semantico implements Constants {
 	}
 
 	/**
-	 * Reconhecimento de literal.
+	 * Reconhecimento de literal como fator.
 	 */
 	private void acaoSemantica22(Token token) {
 		pilhaTipo.push(STRING);
@@ -430,7 +486,7 @@ public class Semantico implements Constants {
 	}
 
 	/**
-	 * Reconhecimento de real.
+	 * Reconhecimento de real como fator.
 	 */
 	private void acaoSemantica06(Token token) {
 		pilhaTipo.push(FLOAT64);
@@ -438,7 +494,7 @@ public class Semantico implements Constants {
 	}
 
 	/**
-	 * Reconhecimento de inteiro.
+	 * Reconhecimento de inteiro como fator.
 	 */
 	private void acaoSemantica05(Token token) {
 		pilhaTipo.push(INT64);
