@@ -202,8 +202,9 @@ public class Semantico implements Constants {
 	 * 
 	 * @param token
 	 *            token do valor inicial.
+	 * @throws SemanticError 
 	 */
-	private void acaoSemantica30(Token token) {
+	private void acaoSemantica30(Token token) throws SemanticError {
 		// FIXME: validar o tipo do token com o tipo declarado na lista
 		List<Identificador> listaIds = simbolos.getListaIds();
 		String tipo = listaIds.get(0).getTipo();
@@ -392,6 +393,7 @@ public class Semantico implements Constants {
 	 * Imprimir quebra de linha.
 	 */
 	private void acaoSemantica17() {
+		instrucao.append("ldstr ").appendln("\"\\n\"");
 		print(STRING);
 	}
 
@@ -582,7 +584,7 @@ public class Semantico implements Constants {
 		instrucao.append(".locals (");
 		Iterator<Identificador> it = listaIds.iterator();
 		while (true) {
-			instrucao.append(tipo).append(" ").append(it.next());
+			instrucao.append(tipo).append(" ").append(it.next().getLexema());
 			if (it.hasNext()) {
 				instrucao.append(", ");
 				continue;
@@ -592,9 +594,31 @@ public class Semantico implements Constants {
 		instrucao.appendln(")");
 	}
 
-	private void atribuiId(Identificador id, String valor) {
-		// TODO Auto-generated method stub
-
+	private void atribuiId(Identificador id, String valor) throws SemanticError {
+		String loadCmd;
+		switch (id.getTipo()) {
+		case STRING:
+			loadCmd = "ldstr " + valor;
+			break;
+		case FLOAT64:
+			loadCmd = "ldc.r8 " + valor;
+			break;
+		case INT64:
+			loadCmd = "ldc.i8 " + valor;
+			break;
+		case BOOL:
+			loadCmd = "ldc.i4.";
+			if ("true".equalsIgnoreCase(valor)) {
+				loadCmd += "1";
+			} else {
+				loadCmd += "0";
+			}
+			break;
+		default:
+			throw new SemanticError("tipo não suportado: " + id.getTipo());
+		}
+		instrucao.appendln(loadCmd);
+		instrucao.append("stloc ").appendln(id.getLexema());
 	}
 
 	private void print(String tipo) {
