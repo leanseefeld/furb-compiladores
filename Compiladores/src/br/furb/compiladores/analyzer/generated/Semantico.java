@@ -23,6 +23,8 @@ public class Semantico implements Constants {
 	private String operadorRelacional;
 	private String tipoDeclarado;
 	private String fileName;
+	private boolean isDeclarando;
+	private Identificador identificador;
 
 	public Semantico(String fileName) {
 		this.fileName = fileName;
@@ -202,7 +204,7 @@ public class Semantico implements Constants {
 	 * 
 	 * @param token
 	 *            token do valor inicial.
-	 * @throws SemanticError 
+	 * @throws SemanticError
 	 */
 	private void acaoSemantica30(Token token) throws SemanticError {
 		// FIXME: validar o tipo do token com o tipo declarado na lista
@@ -223,7 +225,7 @@ public class Semantico implements Constants {
 	 *            expressão sendo atribuída.
 	 */
 	private void acaoSemantica29(Token token) {
-		// TODO
+		instrucao.append("stloc ").appendln(identificador.getLexema());
 	}
 
 	/**
@@ -233,7 +235,7 @@ public class Semantico implements Constants {
 	 *            identificador.
 	 */
 	private void acaoSemantica28(Token token) {
-		// TODO
+		instrucao.append("ldloc ").appendln(token.getLexeme());
 	}
 
 	/**
@@ -254,7 +256,8 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica26(Token token) {
 		tipoDeclarado = null;
-		simbolos.setLista(false);
+		isDeclarando = false;
+		simbolos.clearLista();
 	}
 
 	/**
@@ -266,8 +269,14 @@ public class Semantico implements Constants {
 	 *             caso o identificador já tenha sido declarado.
 	 */
 	private void acaoSemantica25(Token token) throws SemanticError {
-		Identificador identificador = new Identificador(token.getLexeme(), tipoDeclarado);
-		simbolos.inserir(identificador);
+		String lexema = token.getLexeme();
+		Identificador identificador = new Identificador(lexema, tipoDeclarado);
+		if (isDeclarando) {
+			simbolos.inserir(identificador);
+		} else {
+			simbolos.recuperar(lexema);
+			this.identificador = identificador;
+		}
 	}
 
 	/**
@@ -294,7 +303,7 @@ public class Semantico implements Constants {
 		default:
 			throw new IllegalArgumentException("tipo não suportado: " + lexeme);
 		}
-		simbolos.setLista(true);
+		isDeclarando = true;
 	}
 
 	/**

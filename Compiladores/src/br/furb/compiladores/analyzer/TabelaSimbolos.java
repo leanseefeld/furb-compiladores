@@ -18,7 +18,6 @@ import br.furb.compiladores.analyzer.generated.SemanticError;
 public class TabelaSimbolos {
 
 	private final Map<String, Identificador> identificadores;
-	private boolean isLista = false;
 	private final List<Identificador> listaIds;
 
 	/**
@@ -48,9 +47,7 @@ public class TabelaSimbolos {
 			throw new SemanticError("identificador já declarado: " + identificador);
 		}
 		identificadores.put(identificador.getLexema(), identificador);
-		if (isLista()) {
-			listaIds.add(identificador);
-		}
+		listaIds.add(identificador);
 	}
 
 	/**
@@ -91,36 +88,16 @@ public class TabelaSimbolos {
 	}
 
 	/**
-	 * Verifica se os identificadores estão sendo armazenados em um conjunto
-	 * separado que representa uma declaração em lista.
-	 * 
-	 * @return se os identificadores estão sendo armazenados em um conjunto
-	 *         separado que representa uma declaração em lista.
-	 */
-	public final boolean isLista() {
-		return isLista;
-	}
-
-	/**
 	 * Define se os identificadores devem ser armazenados em um conjunto
 	 * separado que representa uma declaração em lista.
-	 * 
-	 * @param isLista
-	 *            se os identificadores devem ser armazenados em um conjunto
-	 *            separado que representa uma declaração em lista.
 	 */
-	public final void setLista(boolean isLista) {
-		if (this.isLista != isLista) {
-			this.isLista = isLista;
-			if (!isLista) {
-				listaIds.clear();
-			}
-		}
+	public final void clearLista() {
+		listaIds.clear();
 	}
 
 	/**
 	 * Retorna uma cópia da lista de identificadores reconhecidos em sequência
-	 * enquanto houve o {@link #setLista(boolean) reconhecimento em lista}.
+	 * enquanto houve o {@link #clearLista() reconhecimento em lista}.
 	 * 
 	 * @return cópia da lista de identificadores reconhecidos em declaração em
 	 *         lista.
