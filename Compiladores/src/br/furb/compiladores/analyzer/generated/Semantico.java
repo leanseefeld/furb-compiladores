@@ -334,7 +334,7 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 
-		if (tipo1 != tipo2) {
+		if (tipo1 != tipo2 || (!isNumerico(tipo1) && tipo1 != STRING)) {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
 		}
 
