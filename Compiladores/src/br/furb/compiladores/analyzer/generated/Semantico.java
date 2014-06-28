@@ -11,6 +11,7 @@ import br.furb.compiladores.analyzer.TabelaSimbolos;
 public class Semantico implements Constants {
 
 	private static final String MSG_TIPOS_INCOMPATIVEIS = "Tipos incompatíveis na expressão da linha %d";
+	private static final String MSG_TIPO_INCOMPATIVEL = "Tipo incompatível na expressão da linha %d";
 	private static final String BOOL = "bool";
 	private static final String STRING = "string";
 	private static final String INT64 = "int64";
@@ -309,8 +310,11 @@ public class Semantico implements Constants {
 	/**
 	 * Fator positivo precedido pelo símbolo de positivo ("+").
 	 */
-	private void acaoSemantica23(Token token) {
-		// TODO: verificar tipo
+	private void acaoSemantica23(Token token) throws SemanticError {
+		String tipo = pilhaTipo.peek();
+		if (!isNumerico(tipo)) {
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+		}
 	}
 
 	/**
@@ -466,32 +470,27 @@ public class Semantico implements Constants {
 	 * Reconhecimento da constante lógica <code>false<code>.
 	 */
 	private void acaoSemantica12(Token token) {
-		if (token.getLexeme().equals("true")) { // TODO: isso realmente é possível, Arnaldo? oO
-			instrucao.appendln("ldc.i4.1");
-			pilhaTipo.push(BOOL);
-		} else if (token.getLexeme().equals("false")) {
-			instrucao.appendln("ldc.i4.0");
-			pilhaTipo.push(BOOL);
-		}
+		instrucao.appendln("ldc.i4.0");
+		pilhaTipo.push(BOOL);
 	}
 
 	/**
 	 * Reconhecimento da constante lógica <code>true<code>.
 	 */
 	private void acaoSemantica11(Token token) {
-		if (token.getLexeme().equals("true")) {
-			instrucao.appendln("ldc.i4.1");
-			pilhaTipo.push(BOOL);
-		} else if (token.getLexeme().equals("false")) { // TODO: isso realmente é possível, Arnaldo? oO
-			instrucao.appendln("ldc.i4.0");
-			pilhaTipo.push(BOOL);
-		}
+		instrucao.appendln("ldc.i4.1");
+		pilhaTipo.push(BOOL);
 	}
 
 	/**
 	 * Fator precedido pelo símbolo de negativo ("-").
 	 */
-	private void acaoSemantica07(Token token) {
+	private void acaoSemantica07(Token token) throws SemanticError {
+		String tipo = pilhaTipo.peek();
+		if (!isNumerico(tipo)) {
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+		}
+
 		instrucao.appendln("ldc.i8 -1");
 		instrucao.appendln("mul");
 	}
