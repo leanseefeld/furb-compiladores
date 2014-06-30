@@ -184,9 +184,11 @@ public class Semantico implements Constants {
 	 * 
 	 * @param token
 	 *            desnecessário.
+	 * @throws SemanticError 
 	 */
 	private void acaoSemantica32(Token token) {
 		// TODO Vivian
+		
 	}
 
 	/**
@@ -194,9 +196,20 @@ public class Semantico implements Constants {
 	 * 
 	 * @param token
 	 *            desnecessário.
+	 * @throws SemanticError 
 	 */
-	private void acaoSemantica31(Token token) {
+	private void acaoSemantica31(Token token) throws SemanticError {
 		// TODO Vivian
+		String tipo1 = pilhaTipo.pop();
+        String tipo2 = pilhaTipo.pop();
+        if (!tipo1.equals("bool") || !tipo2.equals("bool")) {
+            throw new SemanticError(
+                    "Tipos incompatíveis na expressão da linha linha %d");
+        }
+        instrucao.append("	and");
+        pilhaTipo.push("bool");
+		
+		
 	}
 
 	/**
