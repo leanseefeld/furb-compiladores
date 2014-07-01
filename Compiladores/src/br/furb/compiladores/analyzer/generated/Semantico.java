@@ -1,5 +1,6 @@
 package br.furb.compiladores.analyzer.generated;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -16,6 +17,8 @@ public class Semantico implements Constants {
 	private static final String STRING = "string";
 	private static final String INT64 = "int64";
 	private static final String FLOAT64 = "float64";
+	private static final Identificador ID_LEFT_VALUE = new Identificador("__le", FLOAT64);
+	private static final Identificador ID_RIGHT_VALUE = new Identificador("__re", FLOAT64);
 
 	private final IndentedCodeBuilder instrucao;
 	private final Stack<String> pilhaTipo;
@@ -217,6 +220,7 @@ public class Semantico implements Constants {
 		for (Identificador id : listaIds) {
 			atribuiId(id, valor);
 		}
+		simbolos.clearLista();
 	}
 
 	/**
@@ -258,7 +262,6 @@ public class Semantico implements Constants {
 	private void acaoSemantica26(Token token) {
 		tipoDeclarado = null;
 		isDeclarando = false;
-		simbolos.clearLista();
 	}
 
 	/**
@@ -271,12 +274,12 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica25(Token token) throws SemanticError {
 		String lexema = token.getLexeme();
-		Identificador identificador = new Identificador(lexema, tipoDeclarado);
+		Identificador id = new Identificador(lexema, tipoDeclarado);
 		if (isDeclarando) {
-			simbolos.inserir(identificador);
+			simbolos.inserir(id);
 		} else {
 			simbolos.recuperar(lexema);
-			this.identificador = identificador;
+			this.identificador = id;
 		}
 	}
 
@@ -305,6 +308,7 @@ public class Semantico implements Constants {
 			throw new IllegalArgumentException("tipo não suportado: " + lexeme);
 		}
 		isDeclarando = true;
+		simbolos.clearLista();
 	}
 
 	/**
@@ -339,32 +343,39 @@ public class Semantico implements Constants {
 		}
 
 		pilhaTipo.push(BOOL);
+		dupToId(ID_RIGHT_VALUE);
 
-		String command = null;
 		switch (operadorRelacional) {
 		case "==":
-			command = "ceq";
+			instrucao.append("ceq");
 			break;
 		case "!=":
-			command = "   "; // TODO
+			instrucao.append("ceq");
+			negar();
 			break;
 		case "<":
-			command = "clt";
+			instrucao.appendln("clt");
 			break;
 		case "<=":
-			command = "   "; // TODO
+			instrucao.appendln("clt");
+			loadId(ID_LEFT_VALUE);
+			loadId(ID_RIGHT_VALUE);
+			instrucao.appendln("ceq");
+			instrucao.appendln("or");
 			break;
 		case ">":
-			command = "cgt";
+			instrucao.appendln("cgt");
 			break;
 		case ">=":
-			command = "   "; // TODO
+			instrucao.appendln("cgt");
+			loadId(ID_LEFT_VALUE);
+			loadId(ID_RIGHT_VALUE);
+			instrucao.appendln("ceq");
+			instrucao.appendln("or");
 			break;
 		default:
 			throw new SemanticError("Operador não reconhecido: " + operadorRelacional);
 		}
-
-		instrucao.appendln(command);
 	}
 
 	/**
@@ -372,6 +383,7 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica20(Token token) {
 		operadorRelacional = token.getLexeme();
+		dupToId(ID_LEFT_VALUE);
 	}
 
 	/**
@@ -443,6 +455,7 @@ public class Semantico implements Constants {
 		instrucao.appendln("{");
 		instrucao.inc();
 		instrucao.appendln(".entrypoint");
+		declararIds(Arrays.asList(ID_LEFT_VALUE, ID_RIGHT_VALUE), ID_LEFT_VALUE.getTipo());
 	}
 
 	/**
@@ -454,16 +467,15 @@ public class Semantico implements Constants {
 	}
 
 	/**
-	 * Operador de negação de um elemento.
+	 * Negação lógica.
 	 */
 	private void acaoSemantica13(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		if (tipo1 != BOOL) {
-			throw new SemanticError("Tipos incompativeis na expressão da linha %d");
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
 		}
 		pilhaTipo.push(BOOL);
-		instrucao.appendln("ldc.i4.1");
-		instrucao.appendln("xor");
+		negar();
 	}
 
 	/**
@@ -633,8 +645,22 @@ public class Semantico implements Constants {
 		instrucao.appendln(String.format("call void [mscorlib]System.Console::Write(%s)", tipo));
 	}
 
+	private void negar() {
+		instrucao.appendln("ldc.i4.1");
+		instrucao.appendln("xor");
+	}
+
 	public String getInstrucoes() {
 		return instrucao.toString();
+	}
+
+	private void dupToId(Identificador id) {
+		instrucao.appendln("dup");
+		instrucao.append("stloc ").appendln(id.getLexema());
+	}
+
+	private void loadId(Identificador id) {
+		instrucao.append("ldloc ").appendln(id);
 	}
 
 	private static boolean isNumerico(String... tipos) {
