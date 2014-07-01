@@ -187,9 +187,11 @@ public class Semantico implements Constants {
 	 * 
 	 * @param token
 	 *            desnecessário.
+	 * @throws SemanticError
 	 */
 	private void acaoSemantica32(Token token) {
 		// TODO Vivian
+
 	}
 
 	/**
@@ -197,13 +199,13 @@ public class Semantico implements Constants {
 	 * 
 	 * @param token
 	 *            desnecessário.
+	 * @throws SemanticError
 	 */
 	private void acaoSemantica31(Token token) throws SemanticError {
 		String tipo = pilhaTipo.pop();
 		if (tipo != BOOL) {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
 		}
-		// TODO Vivian
 	}
 
 	/**
