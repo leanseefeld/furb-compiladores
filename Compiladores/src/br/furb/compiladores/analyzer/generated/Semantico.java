@@ -1,8 +1,10 @@
 package br.furb.compiladores.analyzer.generated;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import br.furb.compiladores.analyzer.Identificador;
@@ -29,12 +31,22 @@ public class Semantico implements Constants {
 	private String fileName;
 	private boolean isDeclarando;
 	private Identificador identificador;
+	private Map<String, Stack<String>> labels;
+	private int proxRotulo = 1;
+	
+	private String DO_WHILE = "DO_WHILE";
+	private String IF = "IF";
+	private String FOR = "FOR";
 
 	public Semantico(String fileName) {
 		this.fileName = fileName;
 		instrucao = new IndentedCodeBuilder();
 		pilhaTipo = new Stack<>();
 		simbolos = new TabelaSimbolos();
+		labels = new HashMap<String, Stack<String>>();
+		labels.put(DO_WHILE, new Stack<String>());
+		labels.put(IF, new Stack<String>());
+		labels.put(FOR, new Stack<String>());
 	}
 
 	public void executeAction(int action, Token token) throws SemanticError {
@@ -160,6 +172,10 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica35(Token token) {
 		// TODO Vivian
+		Stack<String> dowhile = labels.get(DO_WHILE);
+		String label = dowhile.pop();
+		//Faz o uso do label retirado para gerar o codigo para este label
+        instrucao.append("	brfalse " +label);
 	}
 
 	/**
@@ -169,7 +185,11 @@ public class Semantico implements Constants {
 	 *            desnecessário.
 	 */
 	private void acaoSemantica34(Token token) {
-		// TODO Vivian
+		String label = "r" + String.valueOf(proxRotulo);
+		proxRotulo++;
+		Stack<String> dowhile = labels.get(DO_WHILE);
+		dowhile.push(label);
+		//Gerar o codigo do label aqui?
 	}
 
 	/**
@@ -190,7 +210,7 @@ public class Semantico implements Constants {
 	 * @throws SemanticError
 	 */
 	private void acaoSemantica32(Token token) {
-		// TODO Vivian
+		instrucao.append("	" + labels.get(IF).pop() + ":");
 
 	}
 
