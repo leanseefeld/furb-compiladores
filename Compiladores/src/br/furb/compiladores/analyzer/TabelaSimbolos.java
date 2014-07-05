@@ -42,11 +42,11 @@ public class TabelaSimbolos {
 	 *             caso o identificador já tenha sido declarado.
 	 */
 	public void inserir(Identificador identificador) throws SemanticError {
-		//TODO: a linguagem é case sensitive? se não for, mudar aqui
-		if (identificadores.containsKey(identificador)) {
+		String lexema = identificador.getLexema().toLowerCase();
+		if (identificadores.containsKey(lexema)) {
 			throw new SemanticError("identificador já declarado: " + identificador);
 		}
-		identificadores.put(identificador.getLexema(), identificador);
+		identificadores.put(lexema, identificador);
 		listaIds.add(identificador);
 	}
 
@@ -64,7 +64,7 @@ public class TabelaSimbolos {
 	 *             se o lexema não for encontrado.
 	 */
 	public Identificador recuperar(String lexema) throws SemanticError {
-		Identificador identificador = identificadores.get(lexema);
+		Identificador identificador = identificadores.get(lexema.toLowerCase());
 		if (identificador == null) {
 			throw new SemanticError("identificador não declarado: " + lexema);
 		}
