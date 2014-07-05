@@ -1,0 +1,7 @@
+main 
+	global integer lado, area;
+	
+	scan (lado);
+	area = lado * lado;
+	println (area);
+end
