@@ -33,7 +33,7 @@ public class Semantico implements Constants {
 	private Identificador identificador;
 	private Map<String, Stack<String>> labels;
 	private int proxRotulo = 1;
-	
+
 	private String DO_WHILE = "DO_WHILE";
 	private String IF = "IF";
 	private String FOR = "FOR";
@@ -174,8 +174,8 @@ public class Semantico implements Constants {
 		// TODO Vivian
 		Stack<String> dowhile = labels.get(DO_WHILE);
 		String label = dowhile.pop();
-		//Faz o uso do label retirado para gerar o codigo para este label
-        instrucao.append("	brfalse " +label);
+		// Faz o uso do label retirado para gerar o codigo para este label
+		instrucao.append("brfalse ").appendln(label);
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class Semantico implements Constants {
 		proxRotulo++;
 		Stack<String> dowhile = labels.get(DO_WHILE);
 		dowhile.push(label);
-		//Gerar o codigo do label aqui?
+		// Gerar o codigo do label aqui?
 	}
 
 	/**
@@ -210,8 +210,9 @@ public class Semantico implements Constants {
 	 * @throws SemanticError
 	 */
 	private void acaoSemantica32(Token token) {
-		instrucao.append("	" + labels.get(IF).pop() + ":");
-
+		instrucao.dec();
+		instrucao.append(labels.get(IF).pop()).append(":");
+		instrucao.inc();
 	}
 
 	/**
@@ -327,7 +328,7 @@ public class Semantico implements Constants {
 		case "boolean":
 			tipoDeclarado = BOOL;
 			break;
-		case "int":
+		case "integer":
 			tipoDeclarado = INT64;
 			break;
 		default:
