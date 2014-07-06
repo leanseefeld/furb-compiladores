@@ -1,0 +1,11 @@
+main 
+	global integer lado, area = 0;
+	
+	scan (lado);
+	if (lado > 1)
+		area = lado * lado;
+		print (area);
+	else
+		print ("valor inválido");
+	end
+end
