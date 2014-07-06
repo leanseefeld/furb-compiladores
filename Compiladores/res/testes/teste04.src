@@ -1,0 +1,22 @@
+main 
+	global float lado, area, temp = 0,0;
+	
+	scan (lado);
+	if (lado > 1,1)
+		area = lado * lado;
+		println (area);
+		do
+			println("lado = ", lado);
+			print("subtrair quanto de lado? > ");
+			scan(temp);
+			if (temp < 1,0)
+				println (" (que pouco...)");
+			end;
+			lado = lado - temp;
+		while (lado >= 1,0);
+		println ("o lado começou maior que 1,1 e acabou menor que 1,0 :)");
+	else
+		print ("valor inválido");
+	end;
+	println("bye!");
+end
