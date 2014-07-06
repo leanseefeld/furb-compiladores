@@ -15,12 +15,12 @@ public class Semantico implements Constants {
 
 	private static final String MSG_TIPOS_INCOMPATIVEIS = "Tipos incompatíveis na expressão da linha %d";
 	private static final String MSG_TIPO_INCOMPATIVEL = "Tipo incompatível na expressão da linha %d";
-	private static final String BOOL = "bool";
-	private static final String STRING = "string";
-	private static final String INT64 = "int64";
-	private static final String FLOAT64 = "float64";
-	private static final Identificador ID_LEFT_VALUE = new Identificador("__le", FLOAT64);
-	private static final Identificador ID_RIGHT_VALUE = new Identificador("__re", FLOAT64);
+	private static final String MSIL_BOOL = "bool";
+	private static final String MSIL_STRING = "string";
+	private static final String MSIL_INT64 = "int64";
+	private static final String MSIL_FLOAT64 = "float64";
+	private static final Identificador ID_LEFT_VALUE = new Identificador("__le", MSIL_FLOAT64);
+	private static final Identificador ID_RIGHT_VALUE = new Identificador("__re", MSIL_FLOAT64);
 
 	private final IndentedCodeBuilder instrucao;
 	private final Stack<String> pilhaTipo;
@@ -37,6 +37,7 @@ public class Semantico implements Constants {
 	private String DO_WHILE = "DO_WHILE";
 	private String IF = "IF";
 	private String FOR = "FOR";
+	private boolean possuiHelperRelacional = false;
 
 	public Semantico(String fileName) {
 		this.fileName = fileName;
@@ -74,6 +75,9 @@ public class Semantico implements Constants {
 				break;
 			case 7:
 				acaoSemantica07(token);
+				break;
+			case 10:
+				acaoSemantica10(token);
 				break;
 			case 11:
 				acaoSemantica11(token);
@@ -224,7 +228,7 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica31(Token token) throws SemanticError {
 		String tipo = pilhaTipo.pop();
-		if (tipo != BOOL) {
+		if (tipo != MSIL_BOOL) {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
 		}
 	}
@@ -243,11 +247,9 @@ public class Semantico implements Constants {
 		String tipo = listaIds.get(0).getTipo();
 		String lexeme = token.getLexeme();
 		String valor = prepararValor(lexeme, tipo);
-		declararIds(listaIds, tipo);
 		for (Identificador id : listaIds) {
 			atribuiId(id, valor);
 		}
-		simbolos.clearLista();
 	}
 
 	/**
@@ -266,8 +268,10 @@ public class Semantico implements Constants {
 	 * @param token
 	 *            identificador.
 	 */
-	private void acaoSemantica28(Token token) {
-		instrucao.append("ldloc ").appendln(token.getLexeme());
+	private void acaoSemantica28(Token token) throws SemanticError {
+		Identificador id = simbolos.recuperar(token.getLexeme());
+		instrucao.append("ldloc ").appendln(id.getLexema());
+		pilhaTipo.push(id.getTipo());
 	}
 
 	/**
@@ -277,11 +281,24 @@ public class Semantico implements Constants {
 	 *            desnecessário.
 	 */
 	private void acaoSemantica27(Token token) {
-		// TODO
+		instrucao.appendln("call string [mscorlib]System.Console::ReadLine()");
+		// duplica o valor de acordo com a quantidade de variáveis - 1
+		List<Identificador> ids = this.simbolos.getListaIds();
+		for (int i = 1; i < ids.size(); i++) {
+			instrucao.appendln("dup");
+		}
+		// converte para cada tipo de variável
+		for (Identificador id : ids) {
+			String tipo = id.getTipo();
+			if (tipo != MSIL_STRING) {
+				instrucao.appendln(String.format("call %s [mscorlib]System.%s::Parse(string)", tipo, classeParaTipo(tipo)));
+			}
+			instrucao.append("stloc ").appendln(id.getLexema());
+		}
 	}
 
 	/**
-	 * Completa o reconhecimento de uma lista de identificadores.
+	 * Completa o reconhecimento de uma lista de declaração de identificadores.
 	 * 
 	 * @param token
 	 *            desnecessário.
@@ -289,6 +306,10 @@ public class Semantico implements Constants {
 	private void acaoSemantica26(Token token) {
 		tipoDeclarado = null;
 		isDeclarando = false;
+		simbolos.setLista(false);
+		List<Identificador> listaIds = simbolos.getListaIds();
+		String tipo = listaIds.get(0).getTipo();
+		declararIds(listaIds, tipo);
 	}
 
 	/**
@@ -301,17 +322,15 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica25(Token token) throws SemanticError {
 		String lexema = token.getLexeme();
-		Identificador id = new Identificador(lexema, tipoDeclarado);
 		if (isDeclarando) {
-			simbolos.inserir(id);
+			simbolos.inserir(new Identificador(lexema, tipoDeclarado));
 		} else {
-			simbolos.recuperar(lexema);
-			this.identificador = id;
+			this.identificador = simbolos.recuperar(lexema);
 		}
 	}
 
 	/**
-	 * Reconhece o tipo de uma variável global.
+	 * Reconhece o tipo de uma variável.
 	 * 
 	 * @param token
 	 *            tipo da variável.
@@ -320,26 +339,27 @@ public class Semantico implements Constants {
 		final String lexeme = token.getLexeme().toLowerCase().intern();
 		switch (lexeme) {
 		case "float":
-			tipoDeclarado = FLOAT64;
+			tipoDeclarado = MSIL_FLOAT64;
 			break;
 		case "string":
-			tipoDeclarado = STRING;
+			tipoDeclarado = MSIL_STRING;
 			break;
 		case "boolean":
-			tipoDeclarado = BOOL;
+			tipoDeclarado = MSIL_BOOL;
 			break;
 		case "integer":
-			tipoDeclarado = INT64;
+			tipoDeclarado = MSIL_INT64;
 			break;
 		default:
 			throw new IllegalArgumentException("tipo não suportado: " + lexeme);
 		}
 		isDeclarando = true;
 		simbolos.clearLista();
+		simbolos.setLista(true);
 	}
 
 	/**
-	 * Fator positivo precedido pelo símbolo de positivo ("+").
+	 * Fator precedido pelo símbolo de positivo ("+").
 	 */
 	private void acaoSemantica23(Token token) throws SemanticError {
 		String tipo = pilhaTipo.peek();
@@ -352,8 +372,8 @@ public class Semantico implements Constants {
 	 * Reconhecimento de literal como fator.
 	 */
 	private void acaoSemantica22(Token token) {
-		pilhaTipo.push(STRING);
-		String lexeme = prepararValor(token.getLexeme(), STRING);
+		pilhaTipo.push(MSIL_STRING);
+		String lexeme = prepararValor(token.getLexeme(), MSIL_STRING);
 		instrucao.append("ldstr ").appendln(lexeme);
 	}
 
@@ -365,12 +385,11 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 
-		if (tipo1 != tipo2 || (!isNumerico(tipo1) && tipo1 != STRING)) {
+		if (tipo1 != tipo2 || (!isNumerico(tipo1) && tipo1 != MSIL_STRING)) {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
 		}
 
-		pilhaTipo.push(BOOL);
-		dupToId(ID_RIGHT_VALUE);
+		pilhaTipo.push(MSIL_BOOL);
 
 		switch (operadorRelacional) {
 		case "==":
@@ -384,6 +403,7 @@ public class Semantico implements Constants {
 			instrucao.appendln("clt");
 			break;
 		case "<=":
+			dupToId(ID_RIGHT_VALUE);
 			instrucao.appendln("clt");
 			loadId(ID_LEFT_VALUE);
 			loadId(ID_RIGHT_VALUE);
@@ -394,6 +414,7 @@ public class Semantico implements Constants {
 			instrucao.appendln("cgt");
 			break;
 		case ">=":
+			dupToId(ID_RIGHT_VALUE);
 			instrucao.appendln("cgt");
 			loadId(ID_LEFT_VALUE);
 			loadId(ID_RIGHT_VALUE);
@@ -410,7 +431,10 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica20(Token token) {
 		operadorRelacional = token.getLexeme();
-		dupToId(ID_LEFT_VALUE);
+		if (operadorRelacional.equals("<=") || operadorRelacional.equals(">=")) {
+			criarHelperRelacional();
+			dupToId(ID_LEFT_VALUE);
+		}
 	}
 
 	/**
@@ -419,12 +443,12 @@ public class Semantico implements Constants {
 	private void acaoSemantica19(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
-		if (tipo1 != BOOL || tipo2 != BOOL) {
+		if (tipo1 != MSIL_BOOL || tipo2 != MSIL_BOOL) {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
 		}
 		instrucao.appendln("and");
 
-		pilhaTipo.push(BOOL);
+		pilhaTipo.push(MSIL_BOOL);
 	}
 
 	/**
@@ -438,7 +462,7 @@ public class Semantico implements Constants {
 		}
 		instrucao.appendln("or");
 
-		pilhaTipo.push(BOOL);
+		pilhaTipo.push(MSIL_BOOL);
 	}
 
 	/**
@@ -446,7 +470,7 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica17() {
 		instrucao.append("ldstr ").appendln("\"\\n\"");
-		print(STRING);
+		print(MSIL_STRING);
 	}
 
 	/**
@@ -482,7 +506,6 @@ public class Semantico implements Constants {
 		instrucao.appendln("{");
 		instrucao.inc();
 		instrucao.appendln(".entrypoint");
-		declararIds(Arrays.asList(ID_LEFT_VALUE, ID_RIGHT_VALUE), ID_LEFT_VALUE.getTipo());
 	}
 
 	/**
@@ -498,10 +521,10 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica13(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
-		if (tipo1 != BOOL) {
+		if (tipo1 != MSIL_BOOL) {
 			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
 		}
-		pilhaTipo.push(BOOL);
+		pilhaTipo.push(MSIL_BOOL);
 		negar();
 	}
 
@@ -510,7 +533,7 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica12(Token token) {
 		instrucao.appendln("ldc.i4.0");
-		pilhaTipo.push(BOOL);
+		pilhaTipo.push(MSIL_BOOL);
 	}
 
 	/**
@@ -518,7 +541,15 @@ public class Semantico implements Constants {
 	 */
 	private void acaoSemantica11(Token token) {
 		instrucao.appendln("ldc.i4.1");
-		pilhaTipo.push(BOOL);
+		pilhaTipo.push(MSIL_BOOL);
+	}
+
+	/**
+	 * Inicia o reconhecimento dos identificadores em um comando de leitura.
+	 */
+	private void acaoSemantica10(Token token) {
+		simbolos.clearLista();
+		simbolos.setLista(true);
 	}
 
 	/**
@@ -538,7 +569,7 @@ public class Semantico implements Constants {
 	 * Reconhecimento de real como fator.
 	 */
 	private void acaoSemantica06(Token token) {
-		pilhaTipo.push(FLOAT64);
+		pilhaTipo.push(MSIL_FLOAT64);
 		instrucao.appendln("ldc.r8 " + token.getLexeme().replace(',', '.'));
 	}
 
@@ -546,7 +577,7 @@ public class Semantico implements Constants {
 	 * Reconhecimento de inteiro como fator.
 	 */
 	private void acaoSemantica05(Token token) {
-		pilhaTipo.push(INT64);
+		pilhaTipo.push(MSIL_INT64);
 		instrucao.appendln("ldc.i8 " + token.getLexeme());
 	}
 
@@ -561,10 +592,10 @@ public class Semantico implements Constants {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
 		}
 
-		if (tipo1 == FLOAT64 || tipo2 == FLOAT64) {
-			pilhaTipo.push(FLOAT64);
+		if (tipo1 == MSIL_FLOAT64 || tipo2 == MSIL_FLOAT64) {
+			pilhaTipo.push(MSIL_FLOAT64);
 		} else {
-			pilhaTipo.push(INT64);
+			pilhaTipo.push(MSIL_INT64);
 		}
 
 		instrucao.appendln("div");
@@ -581,10 +612,10 @@ public class Semantico implements Constants {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
 		}
 
-		if (tipo1 == FLOAT64 || tipo2 == FLOAT64) {
-			pilhaTipo.push(FLOAT64);
+		if (tipo1 == MSIL_FLOAT64 || tipo2 == MSIL_FLOAT64) {
+			pilhaTipo.push(MSIL_FLOAT64);
 		} else {
-			pilhaTipo.push(INT64);
+			pilhaTipo.push(MSIL_INT64);
 		}
 		instrucao.appendln("mul");
 	}
@@ -600,10 +631,10 @@ public class Semantico implements Constants {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
 		}
 
-		if (tipo1 == FLOAT64 || tipo2 == FLOAT64) {
-			pilhaTipo.push(FLOAT64);
+		if (tipo1 == MSIL_FLOAT64 || tipo2 == MSIL_FLOAT64) {
+			pilhaTipo.push(MSIL_FLOAT64);
 		} else {
-			pilhaTipo.push(INT64);
+			pilhaTipo.push(MSIL_INT64);
 		}
 		instrucao.appendln("sub");
 	}
@@ -619,12 +650,19 @@ public class Semantico implements Constants {
 			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
 		}
 
-		if (tipo1 == FLOAT64 || tipo2 == FLOAT64) {
-			pilhaTipo.push(FLOAT64);
+		if (tipo1 == MSIL_FLOAT64 || tipo2 == MSIL_FLOAT64) {
+			pilhaTipo.push(MSIL_FLOAT64);
 		} else {
-			pilhaTipo.push(INT64);
+			pilhaTipo.push(MSIL_INT64);
 		}
 		instrucao.appendln("add");
+	}
+
+	private void criarHelperRelacional() {
+		if (!possuiHelperRelacional) {
+			declararIds(Arrays.asList(ID_LEFT_VALUE, ID_RIGHT_VALUE), ID_LEFT_VALUE.getTipo());
+			possuiHelperRelacional = true;
+		}
 	}
 
 	private void declararIds(List<Identificador> listaIds, String tipo) {
@@ -644,16 +682,16 @@ public class Semantico implements Constants {
 	private void atribuiId(Identificador id, String valor) throws SemanticError {
 		String loadCmd;
 		switch (id.getTipo()) {
-		case STRING:
+		case MSIL_STRING:
 			loadCmd = "ldstr " + valor;
 			break;
-		case FLOAT64:
+		case MSIL_FLOAT64:
 			loadCmd = "ldc.r8 " + valor;
 			break;
-		case INT64:
+		case MSIL_INT64:
 			loadCmd = "ldc.i8 " + valor;
 			break;
-		case BOOL:
+		case MSIL_BOOL:
 			loadCmd = "ldc.i4.";
 			if ("true".equalsIgnoreCase(valor)) {
 				loadCmd += "1";
@@ -687,12 +725,12 @@ public class Semantico implements Constants {
 	}
 
 	private void loadId(Identificador id) {
-		instrucao.append("ldloc ").appendln(id);
+		instrucao.append("ldloc ").appendln(id.getLexema());
 	}
 
 	private static boolean isNumerico(String... tipos) {
 		for (String tipo : tipos) {
-			if (tipo != INT64 && tipo != FLOAT64) {
+			if (tipo != MSIL_INT64 && tipo != MSIL_FLOAT64) {
 				return false;
 			}
 		}
@@ -701,7 +739,7 @@ public class Semantico implements Constants {
 
 	private static boolean isLogico(String... tipos) {
 		for (String tipo : tipos) {
-			if (tipo != BOOL) {
+			if (tipo != MSIL_BOOL) {
 				return false;
 			}
 		}
@@ -719,15 +757,13 @@ public class Semantico implements Constants {
 	 * @return valor representado para o MSIL.
 	 */
 	private static String prepararValor(String lexeme, String tipo) {
-		switch (tipo) {
-		case FLOAT64:
+		if (tipo == MSIL_FLOAT64) {
 			return lexeme.replace(',', '.');
-		case STRING:
-		case INT64:
-		case BOOL:
-		default:
-			return lexeme;
 		}
+		return lexeme;
 	}
 
+	private static String classeParaTipo(String tipo) {
+		return String.valueOf(tipo.charAt(0)).toUpperCase().concat(tipo.substring(1).toLowerCase());
+	}
 }

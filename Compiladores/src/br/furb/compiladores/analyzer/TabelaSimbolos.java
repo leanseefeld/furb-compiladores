@@ -18,6 +18,7 @@ import br.furb.compiladores.analyzer.generated.SemanticError;
 public class TabelaSimbolos {
 
 	private final Map<String, Identificador> identificadores;
+	private boolean isLista = false;
 	private final List<Identificador> listaIds;
 
 	/**
@@ -44,10 +45,12 @@ public class TabelaSimbolos {
 	public void inserir(Identificador identificador) throws SemanticError {
 		String lexema = identificador.getLexema().toLowerCase();
 		if (identificadores.containsKey(lexema)) {
-			throw new SemanticError("identificador já declarado: " + identificador);
+			throw new SemanticError("identificador já declarado: " + identificador.getLexema());
 		}
 		identificadores.put(lexema, identificador);
-		listaIds.add(identificador);
+		if (isLista()) {
+			listaIds.add(identificador);
+		}
 	}
 
 	/**
@@ -68,6 +71,9 @@ public class TabelaSimbolos {
 		if (identificador == null) {
 			throw new SemanticError("identificador não declarado: " + lexema);
 		}
+		if (isLista()) {
+			listaIds.add(identificador);
+		}
 		return identificador;
 	}
 
@@ -76,6 +82,7 @@ public class TabelaSimbolos {
 	 */
 	public void destruir() {
 		identificadores.clear();
+		listaIds.clear();
 	}
 
 	/**
@@ -88,22 +95,44 @@ public class TabelaSimbolos {
 	}
 
 	/**
+	 * Verifica se os identificadores estão sendo armazenados em um conjunto
+	 * separado que representa uma declaração em lista.
+	 * 
+	 * @return se os identificadores estão sendo armazenados em um conjunto
+	 *         separado que representa uma declaração em lista.
+	 */
+	public final boolean isLista() {
+		return isLista;
+	}
+
+	/**
 	 * Define se os identificadores devem ser armazenados em um conjunto
 	 * separado que representa uma declaração em lista.
+	 * 
+	 * @param isLista
+	 *            se os identificadores devem ser armazenados em um conjunto
+	 *            separado que representa uma declaração em lista.
 	 */
-	public final void clearLista() {
-		listaIds.clear();
+	public final void setLista(boolean isLista) {
+		this.isLista = isLista;
 	}
 
 	/**
 	 * Retorna uma cópia da lista de identificadores reconhecidos em sequência
-	 * enquanto houve o {@link #clearLista() reconhecimento em lista}.
+	 * enquanto houve o {@link #setLista(boolean) reconhecimento em lista}.
 	 * 
 	 * @return cópia da lista de identificadores reconhecidos em declaração em
 	 *         lista.
 	 */
 	public List<Identificador> getListaIds() {
 		return new ArrayList<>(listaIds);
+	}
+
+	/**
+	 * Limpa a lista de símbolos armazenados até o momento.
+	 */
+	public void clearLista() {
+		listaIds.clear();
 	}
 
 }

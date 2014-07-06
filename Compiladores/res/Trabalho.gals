@@ -147,7 +147,7 @@ pr_while = identificador: "while"
 <lista_cmds> ::= î | <cmd> <lista_cmds>;
 <cmd> ::= identificador #25 <cmd_1> | <cmd_entrada> | <cmd_saida> | <cmd_selecao> | <cmd_repeticao>;
 <cmd_1> ::= "=" <expressao> #29 ";" | "(" <params_reais> ")" ";" #99;
-<cmd_entrada> ::= pr_scan "(" <lista_id> #27 ")" ";";
+<cmd_entrada> ::= pr_scan "(" #10 <lista_id> #27 ")" ";";
 
 <cmd_saida> ::= pr_print "(" <lista_expressoes> ")" ";" | pr_println "(" <lista_expressoes> #17 ")" ";" ;
 
