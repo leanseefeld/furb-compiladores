@@ -21,6 +21,8 @@ public class Semantico implements Constants {
 	private static final String MSIL_FLOAT64 = "float64";
 	private static final Identificador ID_LEFT_VALUE = new Identificador("__le", MSIL_FLOAT64);
 	private static final Identificador ID_RIGHT_VALUE = new Identificador("__re", MSIL_FLOAT64);
+	private static final String DO_WHILE = "DO_WHILE";
+	private static final String IF = "IF";
 
 	private final IndentedCodeBuilder instrucao;
 	private final Stack<String> pilhaTipo;
@@ -34,9 +36,6 @@ public class Semantico implements Constants {
 	private Map<String, Stack<String>> labels;
 	private int proxRotulo = 1;
 
-	private String DO_WHILE = "DO_WHILE";
-	private String IF = "IF";
-	private String FOR = "FOR";
 	private boolean possuiHelperRelacional = false;
 
 	public Semantico(String fileName) {
@@ -47,7 +46,6 @@ public class Semantico implements Constants {
 		labels = new HashMap<String, Stack<String>>();
 		labels.put(DO_WHILE, new Stack<String>());
 		labels.put(IF, new Stack<String>());
-		labels.put(FOR, new Stack<String>());
 	}
 
 	public void executeAction(int action, Token token) throws SemanticError {
@@ -174,12 +172,16 @@ public class Semantico implements Constants {
 	 * @param token
 	 *            desnecessário.
 	 */
-	private void acaoSemantica35(Token token) {
-		// TODO Vivian
+	private void acaoSemantica35(Token token) throws SemanticError {
+		String tipo = pilhaTipo.pop();
+		if (tipo != MSIL_BOOL) {
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+		}
 		Stack<String> dowhile = labels.get(DO_WHILE);
-		String label = dowhile.pop();
-		// Faz o uso do label retirado para gerar o codigo para este label
-		instrucao.append("brfalse ").appendln(label);
+		String startLoop = dowhile.pop();
+
+		// Faz o uso do label retirado para gerar o desvio
+		instrucao.append("brtrue ").appendln(startLoop);
 	}
 
 	/**
@@ -189,10 +191,10 @@ public class Semantico implements Constants {
 	 *            desnecessário.
 	 */
 	private void acaoSemantica34(Token token) {
-		String label = gerarLabel();
+		String startLoop = gerarLabel();
 		Stack<String> dowhile = labels.get(DO_WHILE);
-		dowhile.push(label);
-		// Gerar o codigo do label aqui?
+		dowhile.push(startLoop);
+		instrucao.append(startLoop).appendln(":");
 	}
 
 	/**
