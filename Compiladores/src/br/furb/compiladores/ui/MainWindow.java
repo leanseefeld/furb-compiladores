@@ -38,7 +38,6 @@ import wseefeld.utils.StringUtils;
 import br.furb.compiladores.analyzer.Mensagem;
 import br.furb.compiladores.controller.Compilador;
 import br.furb.compiladores.io.Persistencia;
-import br.org.ilasm.IlasmBuilder;
 
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
