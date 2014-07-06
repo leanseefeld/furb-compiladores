@@ -175,7 +175,7 @@ public class Semantico implements Constants {
 	private void acaoSemantica35(Token token) throws SemanticError {
 		String tipo = pilhaTipo.pop();
 		if (tipo != MSIL_BOOL) {
-			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL, token.getPosition());
 		}
 		Stack<String> dowhile = labels.get(DO_WHILE);
 		String startLoop = dowhile.pop();
@@ -235,7 +235,7 @@ public class Semantico implements Constants {
 	private void acaoSemantica31(Token token) throws SemanticError {
 		String tipo = pilhaTipo.pop();
 		if (tipo != MSIL_BOOL) {
-			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL, token.getPosition());
 		}
 		String ifFalse = gerarLabel();
 		labels.get(IF).push(ifFalse);
@@ -251,9 +251,11 @@ public class Semantico implements Constants {
 	 * @throws SemanticError
 	 */
 	private void acaoSemantica30(Token token) throws SemanticError {
-		// FIXME: validar o tipo do token com o tipo declarado na lista
 		List<Identificador> listaIds = simbolos.getListaIds();
 		String tipo = listaIds.get(0).getTipo();
+		if (tipo != pilhaTipo.pop()) {
+			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
+		}
 		String lexeme = token.getLexeme();
 		String valor = prepararValor(lexeme, tipo);
 		for (Identificador id : listaIds) {
@@ -267,7 +269,11 @@ public class Semantico implements Constants {
 	 * @param token
 	 *            expressão sendo atribuída.
 	 */
-	private void acaoSemantica29(Token token) {
+	private void acaoSemantica29(Token token) throws SemanticError {
+		String tipo = pilhaTipo.pop();
+		if (tipo != identificador.getTipo()) {
+			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
+		}
 		instrucao.append("stloc ").appendln(identificador.getLexema());
 	}
 
@@ -373,7 +379,7 @@ public class Semantico implements Constants {
 	private void acaoSemantica23(Token token) throws SemanticError {
 		String tipo = pilhaTipo.peek();
 		if (!isNumerico(tipo)) {
-			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL, token.getPosition());
 		}
 	}
 
@@ -395,7 +401,7 @@ public class Semantico implements Constants {
 		String tipo2 = pilhaTipo.pop();
 
 		if (tipo1 != tipo2 || (!isNumerico(tipo1) && tipo1 != MSIL_STRING)) {
-			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
+			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
 		}
 
 		pilhaTipo.push(MSIL_BOOL);
@@ -431,7 +437,7 @@ public class Semantico implements Constants {
 			instrucao.appendln("or");
 			break;
 		default:
-			throw new SemanticError("Operador não reconhecido: " + operadorRelacional);
+			throw new SemanticError(String.format("Operador não reconhecido: %s, na linha %%d", operadorRelacional), token.getPosition());
 		}
 	}
 
@@ -453,7 +459,7 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 		if (tipo1 != MSIL_BOOL || tipo2 != MSIL_BOOL) {
-			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
+			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS, token.getPosition());
 		}
 		instrucao.appendln("and");
 
@@ -467,7 +473,7 @@ public class Semantico implements Constants {
 		String tipo1 = pilhaTipo.pop();
 		String tipo2 = pilhaTipo.pop();
 		if (!isLogico(tipo1, tipo2)) {
-			throw new SemanticError("Tipo incompatível na expressão da linha %d");
+			throw new SemanticError("Tipo incompatível na expressão da linha %d", token.getPosition());
 		}
 		instrucao.appendln("or");
 
@@ -531,7 +537,7 @@ public class Semantico implements Constants {
 	private void acaoSemantica13(Token token) throws SemanticError {
 		String tipo1 = pilhaTipo.pop();
 		if (tipo1 != MSIL_BOOL) {
-			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL, token.getPosition());
 		}
 		pilhaTipo.push(MSIL_BOOL);
 		negar();
@@ -567,7 +573,7 @@ public class Semantico implements Constants {
 	private void acaoSemantica07(Token token) throws SemanticError {
 		String tipo = pilhaTipo.peek();
 		if (!isNumerico(tipo)) {
-			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL, token.getPosition());
 		}
 
 		instrucao.appendln("ldc.i8 -1");
@@ -777,6 +783,14 @@ public class Semantico implements Constants {
 	}
 
 	private static String classeParaTipo(String tipo) {
-		return String.valueOf(tipo.charAt(0)).toUpperCase().concat(tipo.substring(1).toLowerCase());
+		switch (tipo) {
+		case MSIL_BOOL:
+			return "Boolean";
+		case MSIL_FLOAT64:
+			return "Double";
+		default:
+			return String.valueOf(tipo.charAt(0)).toUpperCase().concat(tipo.substring(1).toLowerCase());
+		}
+
 	}
 }
