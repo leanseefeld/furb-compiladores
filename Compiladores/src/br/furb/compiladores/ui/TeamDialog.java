@@ -22,6 +22,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 @SuppressWarnings("serial")
@@ -36,7 +37,7 @@ public class TeamDialog extends JDialog {
 		setType(Type.UTILITY);
 		setModal(true);
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle(UIMessages.getString("TeamDialog.lbl_Team")); //$NON-NLS-1$
 		setBounds(100, 100, 450, 205);
 		getContentPane().setLayout(new BorderLayout());
@@ -93,6 +94,7 @@ public class TeamDialog extends JDialog {
 		{
 			JButton btnLink = new JButton(UIMessages.getString("TeamDialog.ref_icons8_Name")); //$NON-NLS-1$
 			btnLink.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (Desktop.isDesktopSupported()) {
 						try {
@@ -140,6 +142,7 @@ public class TeamDialog extends JDialog {
 			{
 				JButton okButton = new JButton(UIMessages.getString("TeamDialog.btn_Ok")); //$NON-NLS-1$
 				okButton.addActionListener(new ActionListener() {
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						dispose();
 					}
