@@ -7,5 +7,5 @@ main
 		print (area);
 	else
 		print ("valor inválido");
-	end
+	end;
 end

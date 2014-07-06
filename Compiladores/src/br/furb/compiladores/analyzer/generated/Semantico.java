@@ -189,8 +189,7 @@ public class Semantico implements Constants {
 	 *            desnecessário.
 	 */
 	private void acaoSemantica34(Token token) {
-		String label = "r" + String.valueOf(proxRotulo);
-		proxRotulo++;
+		String label = gerarLabel();
 		Stack<String> dowhile = labels.get(DO_WHILE);
 		dowhile.push(label);
 		// Gerar o codigo do label aqui?
@@ -203,7 +202,14 @@ public class Semantico implements Constants {
 	 *            desnecessário.
 	 */
 	private void acaoSemantica33(Token token) {
-		// TODO Vivian
+		Stack<String> ifLabels = labels.get(IF);
+		String ifFalse = ifLabels.pop();
+
+		String endElse = gerarLabel();
+		instrucao.append("br ").appendln(endElse);
+		ifLabels.push(endElse);
+
+		instrucao.append(ifFalse).appendln(":");
 	}
 
 	/**
@@ -214,9 +220,7 @@ public class Semantico implements Constants {
 	 * @throws SemanticError
 	 */
 	private void acaoSemantica32(Token token) {
-		instrucao.dec();
-		instrucao.append(labels.get(IF).pop()).append(":");
-		instrucao.inc();
+		instrucao.append(labels.get(IF).pop()).appendln(":");
 	}
 
 	/**
@@ -229,8 +233,11 @@ public class Semantico implements Constants {
 	private void acaoSemantica31(Token token) throws SemanticError {
 		String tipo = pilhaTipo.pop();
 		if (tipo != MSIL_BOOL) {
-			throw new SemanticError(MSG_TIPOS_INCOMPATIVEIS);
+			throw new SemanticError(MSG_TIPO_INCOMPATIVEL);
 		}
+		String ifFalse = gerarLabel();
+		labels.get(IF).push(ifFalse);
+		instrucao.append("brfalse ").appendln(ifFalse);
 	}
 
 	/**
@@ -656,6 +663,10 @@ public class Semantico implements Constants {
 			pilhaTipo.push(MSIL_INT64);
 		}
 		instrucao.appendln("add");
+	}
+
+	private String gerarLabel() {
+		return "r" + String.valueOf(proxRotulo++);
 	}
 
 	private void criarHelperRelacional() {
